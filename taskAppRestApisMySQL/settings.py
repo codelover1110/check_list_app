@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-$l+-eud+50$j2zihhx$g51d(jg1buzcy=03ld#426ov!t=ce5x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -96,16 +96,15 @@ WSGI_APPLICATION = 'taskAppRestApisMySQL.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'task_app_mgr',
+        'ENGINE': 'mysql.connector.django',
         'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'PASSWORD': '12345',
+        'OPTIONS': {
+          'autocommit': True,
+        },
     }
 }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 

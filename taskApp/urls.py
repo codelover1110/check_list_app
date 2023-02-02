@@ -31,7 +31,7 @@ urlpatterns = [
     url(r'^api/check_task$', views.check_task),
     url(r'^api/remove_task$', views.remove_task),
     url(r'^api/uncheck_task$', views.uncheck_task),
-    path('api/uncheck_task/frequency/<str:frequency>', views.uncheck_task),
+    path('api/uncheck_task/frequency/<str:frequency>', views.uncheck_task_frequency),
 
     # Member
     url(r'^api/invite_member_workspace$', views.invite_member_workspace),

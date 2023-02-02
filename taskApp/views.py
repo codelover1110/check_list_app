@@ -247,7 +247,16 @@ def create_list(request):
                     if customer.exists():
                         try:
                             relationship_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], customer=customer[0].id)
-                            if relationship_data.exists() and len(relationship_data) > 1:
+                            if not relationship_data.exists():
+                                relationship_serialize = RelationshipSerializer(data={
+                                    "customer": customer[0].id,
+                                    "workspace": json_data['workspace_id'],
+                                    "list": list_data.id,
+                                    # "role": relationship_data[0].role
+                                    })
+                                if relationship_serialize.is_valid():
+                                    relationship_serialize.save()
+                            elif relationship_data.exists() and len(relationship_data) > 1:
                                 relationship_serialize = RelationshipSerializer(data={
                                     "customer": customer[0].id,
                                     "workspace": json_data['workspace_id'],
@@ -549,13 +558,35 @@ def check_task(request):
         except:
             return JsonResponse({"status": False}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+def uncheck_task(request):
+    if request.method == 'POST':
+        json_data = JSONParser().parse(request)
+        try:
+            for t_member in json_data['members']:
+                try:
+                    relationship_workspace_data = Relationship_tables.objects.get(workspace=json_data['workspace_id'],
+                                                                                    list=json_data['list_id'],
+                                                                                    task=json_data['task_id'],
+                                                                                    customer=t_member
+                                                                                    )
+                    relationship_workspace_data.check_status = False
+                    relationship_workspace_data.save()
+                except:
+                    pass
+
+            return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
+
+        except:
+            return JsonResponse({"status": False}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
-def uncheck_task(request, frequency):
+def uncheck_task_frequency(request, frequency):
     if request.method == 'GET':
         datas = Relationship_tables.objects.all()
         for data in datas:
-            if data.task.frequency == frequency:
+            if not data.task is None and data.task.frequency == frequency:
                 data.check_status = 0
                 data.save()
         return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
