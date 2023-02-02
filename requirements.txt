@@ -1,0 +1,7 @@
+django
+pymysql
+first
+djangorestframework
+pyparsing
+djangorestframework-simplejwt
+mysqlclient
