@@ -112,7 +112,12 @@ def customer_verify(request):
                 return JsonResponse(
                     {
                         "status": True,
-                        "token": member.verify_token
+                        "token": member.verify_token,
+                          "data": {
+                            "email": member.email,
+                            "first_name": member.first_name,
+                            "last_email": member.last_name
+                        }
                     },
                     status=status.HTTP_200_OK)
         return JsonResponse({"message": "code or token invalid"}, status=status.HTTP_400_BAD_REQUEST)
