@@ -17,7 +17,7 @@ import random
 import string
 from datetime import datetime
 
-from .utils import send_email, send_verify_code, send_email_teammember, send_welcome_email, send_invite_member
+from .utils import send_email, send_verify_code, send_email_teammember, send_welcome_email, send_invite_member, send_approval_notification
 
 # Create your views here.
 class UserViewSet(viewsets.ModelViewSet):
@@ -348,6 +348,18 @@ def submit_list(request):
                             
                             relationship_data.priority = work_data["task"]["priority"]
                             relationship_data.save()
+
+                            data = {
+                                "workspace_name": relationship_data.workspace.name,
+                                "list_name": relationship_data.list.name
+                            }
+
+                            try:
+                                send_approval_notification(data, 'codelover93@outlook.com')
+                                pass
+                            except Exception as e:
+                                print(e)
+
                         except Exception as e:
                             print(e)
                             pass

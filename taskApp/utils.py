@@ -43,6 +43,14 @@ def send_invite_member(data, user_email):
     print (' +++++ verification code for {}: {}'.format(user_email, data))
     send_mail(subject, message, email_from, recipient_list )
 
+def send_approval_notification(data, user_email):
+    subject = f"Hi, It is for approval. Workspace - {data['workspace_name']}, List - {data['list_name']}"
+    message = f"http://34.67.86.53:8000/ \n\nChecklist Website: Please signin."
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = [user_email,]
+    print (' +++++ verification code for {}: {}'.format(user_email, data))
+    send_mail(subject, message, email_from, recipient_list )
+
 def send_email_teammember(data, user_email):
     subject = f"Hi, You were added as a team member of {data['office_name']}"
     message = f"http://34.67.86.53:8000/ \n\nOffice Website: {data['office_website']} \n\nStripe Url: {data['stripe_url']} \n\nPhone Number: {data['phone_number']}"
