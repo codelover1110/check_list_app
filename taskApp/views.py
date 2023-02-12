@@ -132,9 +132,22 @@ def get_all_workspaces(request):
         workspaces= Workspace.objects.all()
         data = []
         for workspace in workspaces:
+            datas_workspace = Relationship_tables.objects.filter(workspace= workspace.id)
+            total_lists = []
+            total_tasks = []
+
+            for d in datas_workspace:
+                if not d.list is None and not d.list.id in total_lists:
+                    total_lists.append(d.list.id)
+
+                if not d.task is None:
+                    total_tasks.append(d.list.id)
+            
             data.append({
                 "workspace_id": workspace.id,
-                "workspace_name": workspace.name
+                "workspace_name": workspace.name,
+                "total_lists": len(total_lists),
+                "total_tasks": len(total_tasks)
             })
         return JsonResponse({"status": True, "data": data}, status=status.HTTP_201_CREATED)
 
@@ -542,9 +555,13 @@ def get_list(request, pk):
             id_list = []
             for data in datas:
                 if not data.list is None and not data.list.id in id_list:
+                    total_tasks = Relationship_tables.objects.filter(workspace=pk, list=data.list.id).exclude(task__isnull=True).count()
+                    success_tasks = Relationship_tables.objects.filter(workspace=pk, list=data.list.id, priority='success').count()
                     return_data.append({
                         "list_id": data.list.id,
-                        "list_name": data.list.name
+                        "list_name": data.list.name,
+                        "total_tasks": total_tasks,
+                        "success_tasks": success_tasks
                     })
                     id_list.append(data.list.id)
         else:
