@@ -59,15 +59,15 @@ MIDDLEWARE = [
 CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    # 'http://wolverine.live',
-    # 'https://wolverine.live',
-    # 'http://www.wolverine.live'
-    # 'https://www.wolverine.live',
     'http://localhost:8081',
+    'https://testapp-ef6a8.web.app',
+    'http://testapp-ef6a8.web.app '
 ]
 
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8081',
+    'https://testapp-ef6a8.web.app',
+    'http://testapp-ef6a8.web.app '
 )
 
 ROOT_URLCONF = 'taskAppRestApisMySQL.urls'
