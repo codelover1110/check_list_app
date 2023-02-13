@@ -229,21 +229,25 @@ def create_workspace(request):
 def get_workspace_users(request):
     if request.method == 'POST':
         json_data = JSONParser().parse(request)
-        relationship_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'])
-        if relationship_data.exists():
+        workspace_data = Workspace.objects.filter(id=json_data['workspace_id'])
+        if workspace_data.exists():  
+            relationship_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'])
             return_data = []
-            id_list = []
-            for data in relationship_data:
-                if not data.customer.id in id_list:
-                    id_list.append(data.customer.id)
-                    return_data.append({
-                        "member_id": data.customer.id,
-                        "member_email": data.customer.email,
-                        "member_first_name": data.customer.first_name,
-                        "member_last_name": data.customer.last_name,
-                        "member_role": data.role,
-                    })
-            return JsonResponse({"status": True, "data": {"workspace_id":json_data['workspace_id'], "workspace_name": relationship_data[0].workspace.name,   "members":return_data}}, status=status.HTTP_201_CREATED)
+            if relationship_data.exists():
+                id_list = []
+                for data in relationship_data:
+                    if not data.customer.id in id_list:
+                        id_list.append(data.customer.id)
+                        return_data.append({
+                            "member_id": data.customer.id,
+                            "member_email": data.customer.email,
+                            "member_first_name": data.customer.first_name,
+                            "member_last_name": data.customer.last_name,
+                            "member_role": data.role,
+                        })
+                return JsonResponse({"status": True, "data": {"workspace_id":json_data['workspace_id'], "workspace_name": relationship_data[0].workspace.name,   "members":return_data}}, status=status.HTTP_201_CREATED)
+            else:
+                return JsonResponse({"status": True, "data": {"workspace_id":json_data['workspace_id'], "workspace_name": relationship_data[0].workspace.name,   "members":return_data}}, status=status.HTTP_201_CREATED)
         else:
             return JsonResponse({"status": False, "message": "Workspace doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -622,6 +626,16 @@ def uncheck_task_frequency(request, frequency):
         for data in datas:
             if not data.task is None and data.task.frequency == frequency:
                 data.check_status = 0
+                data.save()
+        return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
+
+@api_view(['GET'])
+def check_task_frequency(request, frequency):
+    if request.method == 'GET':
+        datas = Relationship_tables.objects.all()
+        for data in datas:
+            if not data.task is None and data.task.frequency == frequency:
+                data.check_status = 1
                 data.save()
         return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
 
