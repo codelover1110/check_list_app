@@ -116,7 +116,7 @@ def customer_verify(request):
                           "data": {
                             "email": member.email,
                             "first_name": member.first_name,
-                            "last_email": member.last_name
+                            "last_name": member.last_name
                         }
                     },
                     status=status.HTTP_200_OK)
