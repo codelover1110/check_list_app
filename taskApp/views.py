@@ -140,8 +140,8 @@ def get_all_workspaces(request):
                 if not d.list is None and not d.list.id in total_lists:
                     total_lists.append(d.list.id)
 
-                if not d.task is None:
-                    total_tasks.append(d.list.id)
+                if not d.task is None and not d.task.id in total_tasks:
+                    total_tasks.append(d.task.id)
             
             data.append({
                 "workspace_id": workspace.id,
@@ -682,13 +682,21 @@ def get_list(request, pk):
             id_list = []
             for data in datas:
                 if not data.list is None and not data.list.id in id_list:
-                    total_tasks = Relationship_tables.objects.filter(workspace=pk, list=data.list.id).exclude(task__isnull=True).count()
-                    success_tasks = Relationship_tables.objects.filter(workspace=pk, list=data.list.id, priority='success').count()
+                    tasks_relationship = Relationship_tables.objects.filter(workspace=pk, list=data.list.id).exclude(task__isnull=True)
+                    total_tasks = []
+                    success_tasks = []
+                    for t_data in tasks_relationship:
+                        if not t_data.task.id in total_tasks:
+                            total_tasks.append(t_data.task.id)
+                            if t_data.priority == 'success':
+                                success_tasks.append(t_data.task.id)
+
+                    # success_tasks = Relationship_tables.objects.filter(workspace=pk, list=data.list.id, priority='success').count()
                     return_data.append({
                         "list_id": data.list.id,
                         "list_name": data.list.name,
-                        "total_tasks": total_tasks,
-                        "success_tasks": success_tasks
+                        "total_tasks": len(total_tasks),
+                        "success_tasks": len(success_tasks)
                     })
                     id_list.append(data.list.id)
         else:
@@ -790,7 +798,7 @@ def get_single_workspace_id(request):
             relationship_workspace_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'])
             if relationship_workspace_data.exists():
                 for data in relationship_workspace_data:
-                    if not data.list.id in number_list:
+                    if not data.list is None and not data.list.id in number_list:
                         number_list.append(data.list.id)
                     if data.task is not None:
                         number_of_task.append(data.task.id)
