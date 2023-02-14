@@ -471,6 +471,7 @@ def create_task(request):
                     "frequency": json_data['frequency'],
                     "attachments": "attachments",
                     "dute_date": json_data['dute_date'],
+                    "file_name": json_data['file_name'],
                     "description": json_data['description'],
                 })
 
@@ -538,6 +539,7 @@ def create_task(request):
                         "attachments": "attachments",  
                         "dute_date": json_data['dute_date'],
                         "description": json_data['description'],
+                        "file_name": json_data['file_name'],
                         "priority": json_data['priority']
                     },
                     "members": customer_data
@@ -563,6 +565,7 @@ def edit_task(request):
             task_data.attachments = json_data['attachments']
             task_data.dute_date = json_data['dute_date']
             task_data.description = json_data['description']
+            task_data.file_name = json_data['file_name']
             task_data.save()
 
             datas = Relationship_tables.objects.filter(task=json_data['task_id'])
@@ -628,6 +631,7 @@ def get_task_by_list(request):
                             "attachments": "attachments",  
                             "dute_date": data.task.dute_date,
                             "description": data.task.description,
+                            "file_name": data.task.file_name,
                             "priority": data.priority,
                         },
                         "members": members
@@ -870,6 +874,7 @@ def get_single_task_id(request):
                         "attachments": data.task.attachments,
                         "dute_date": data.task.dute_date,
                         "description": data.task.description,
+                        "file_name": data.task.file_name,
                         "priority": data.priority,
                     },
                     "members": members

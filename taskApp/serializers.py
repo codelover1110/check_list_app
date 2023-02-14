@@ -58,6 +58,7 @@ class TaskSerializer(serializers.ModelSerializer):
                     'name',
                     'frequency',
                     'attachments',
+                    'file_name',
                     'dute_date',
                     'description',
                   )
