@@ -61,13 +61,15 @@ CORS_ALLOW_ALL_ORIGINS = True
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8081',
     'https://testapp-ef6a8.web.app',
-    'http://testapp-ef6a8.web.app '
+    'http://testapp-ef6a8.web.app ',
+    'https://checkcheckgoose.com'
 ]
 
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8081',
     'https://testapp-ef6a8.web.app',
-    'http://testapp-ef6a8.web.app '
+    'http://testapp-ef6a8.web.app ',
+    'https://checkcheckgoose.com'
 )
 
 ROOT_URLCONF = 'taskAppRestApisMySQL.urls'

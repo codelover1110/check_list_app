@@ -471,7 +471,7 @@ def create_task(request):
                     "frequency": json_data['frequency'],
                     "attachments": "attachments",
                     "dute_date": json_data['dute_date'],
-                    "file_name": json_data['file_name'],
+                    # "file_name": json_data['file_name'],
                     "description": json_data['description'],
                 })
 
@@ -539,7 +539,7 @@ def create_task(request):
                         "attachments": "attachments",  
                         "dute_date": json_data['dute_date'],
                         "description": json_data['description'],
-                        "file_name": json_data['file_name'],
+                        # "file_name": json_data['file_name'],
                         "priority": json_data['priority']
                     },
                     "members": customer_data
@@ -804,10 +804,10 @@ def get_single_workspace_id(request):
                 for data in relationship_workspace_data:
                     if not data.list is None and not data.list.id in number_list:
                         number_list.append(data.list.id)
-                    if data.task is not None:
+                    if data.task is not None and not data.task.id in number_of_task:
                         number_of_task.append(data.task.id)
-                    if data.priority == 'success':
-                        number_of_successs_task.append(data.task.id)
+                        if data.priority == 'success':
+                            number_of_successs_task.append(data.task.id)
                 
             return JsonResponse({"status": True, "data": {
                                     "workspace_id": json_data['workspace_id'],
@@ -831,10 +831,10 @@ def get_single_list_id(request):
             relationship_workspace_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], list=json_data['list_id'])
             if relationship_workspace_data.exists():
                 for data in relationship_workspace_data:
-                    if data.task is not None:
+                    if data.task is not None and not data.task.id in number_of_task:
                         number_of_task.append(data.task.id)
-                    if data.priority == 'success':
-                        number_of_successs_task.append(data.task.id)
+                        if data.priority == 'success':
+                            number_of_successs_task.append(data.task.id)
                 
             return JsonResponse({"status": True, "data": {
                                     "workspace_id": json_data['workspace_id'],
