@@ -22,6 +22,7 @@ urlpatterns = [
     url(r'^api/edit_workspace$', views.edit_workspace),
     url(r'^api/remove_workspace$', views.remove_workspace),
     url(r'^api/get_all_workspaces$', views.get_all_workspaces),
+    url(r'^api/get_workspace_for_user$', views.get_workspace_for_user),
     url(r'^api/get_workspace_users$', views.get_workspace_users),
 
     # List

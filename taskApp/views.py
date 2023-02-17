@@ -151,6 +151,33 @@ def get_all_workspaces(request):
             })
         return JsonResponse({"status": True, "data": data}, status=status.HTTP_201_CREATED)
 
+@api_view(['POST'])
+def get_workspace_for_user(request):
+    if request.method == 'POST':
+        workspaces= Workspace.objects.all()
+        data = []
+        json_data = JSONParser().parse(request)
+        for workspace in workspaces:
+            datas_workspace = Relationship_tables.objects.filter(workspace= workspace.id)
+            total_lists = []
+            total_tasks = []
+
+            for d in datas_workspace:
+                if not d.list is None and not d.list.id in total_lists and d.customer.email == json_data['email']:
+                    total_lists.append(d.list.id)
+
+                if not d.task is None and not d.task.id in total_tasks and d.customer.email == json_data['email']:
+                    total_tasks.append(d.task.id)
+
+            if len(total_lists) > 0:
+                data.append({
+                    "workspace_id": workspace.id,
+                    "workspace_name": workspace.name,
+                    "total_lists": len(total_lists),
+                    "total_tasks": len(total_tasks)
+                })
+        return JsonResponse({"status": True, "data": data}, status=status.HTTP_201_CREATED)
+
 
 @api_view(['POST'])
 def invite_member_workspace(request):
@@ -463,13 +490,17 @@ def submit_list(request):
 def create_task(request):
     if request.method == 'POST':
         json_data = JSONParser().parse(request)
+        
+        frequency_data = json_data['frequency']  if "frequency" in json_data else ''
+        dute_date_data = json_data['dute_date']  if "dute_date" in json_data else ''
+
         try:
             relation_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], list=json_data['list_id'])
             if relation_data.exists():  
                 task_db_serialize = TaskSerializer(data={
                     "name": json_data['task_name'],
-                    "frequency": json_data['frequency'],
-                    "dute_date": json_data['dute_date'],
+                    "frequency": frequency_data,
+                    "dute_date": dute_date_data,
                     "description": json_data['description'],
                 })
 
@@ -542,7 +573,6 @@ def create_task(request):
                                     relationship_data.priority = json_data['priority']
                                     relationship_data.save()
                         except Exception as e:
-                            print("000000000000000000000")
                             print(e)
                             pass
                     else:
@@ -555,11 +585,9 @@ def create_task(request):
                     "task": {
                         "id": task_data.id,
                         "name": json_data['task_name'],
-                        "frequency": json_data['frequency'],
-                        # "attachments": "attachments",  
-                        "dute_date": json_data['dute_date'],
+                        "frequency": frequency_data,
+                        "dute_date": dute_date_data,
                         "description": json_data['description'],
-                        # "file_name": json_data['file_name'],
                         "priority": json_data['priority']
                     },
                     "members": customer_data
@@ -578,12 +606,15 @@ def create_task(request):
 def edit_task(request):
     if request.method == 'POST':
         json_data = JSONParser().parse(request)
+        frequency_data = json_data['frequency']  if "frequency" in json_data else ''
+        dute_date_data = json_data['dute_date']  if "dute_date" in json_data else ''
+
         try:
             task_data = Task.objects.get(id=json_data["task_id"])
             task_data.name = json_data['task_name']
-            task_data.frequency = json_data['frequency']
+            task_data.frequency = frequency_data
             task_data.dute_date = json_data['dute_date']
-            task_data.description = json_data['description']
+            task_data.description = dute_date_data
             task_data.save()
 
             datas = Relationship_tables.objects.filter(task=json_data['task_id'])
@@ -591,6 +622,35 @@ def edit_task(request):
                 for data in datas:
                     data.priority = json_data['priority']
                     data.save()
+            try:
+                if 'attachments' in json_data and len(json_data['attachments']) > 0:
+                    att_datas = Attachments.objects.filter(task=json_data['task_id'])
+                    if att_datas.exists():
+                        for att_d in att_datas:
+                            att_d.delete()
+
+                    for att in json_data['attachments']:
+                        import base64
+                        from django.core.files.base import ContentFile
+                        format, imgstr = att['file'].split(';base64,') 
+                        ext = format.split('/')[-1] 
+                        data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)                     
+                        try:
+                            attdb_serialize = AttachmentsSerializer(data={
+                                'task': task_data.id,
+                                'file': data,
+                                'name': att['name']
+                            })
+
+                            if attdb_serialize.is_valid():
+                                attdb_serialize.save()
+                        except Exception as e:
+                            print(e)
+            except Exception as e:
+                print(e)
+                return JsonResponse({"status": False, "message": "Failing file upload"}, status=status.HTTP_400_BAD_REQUEST)
+
+
             return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
         except:
             return JsonResponse({"status": False, "message": "Task doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
