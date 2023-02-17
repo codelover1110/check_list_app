@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -96,15 +97,26 @@ WSGI_APPLICATION = 'taskAppRestApisMySQL.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'NAME': 'task_app_mgr',
+#         'ENGINE': 'mysql.connector.django',
+#         'USER': 'root',
+#         'PASSWORD': '12345',
+#         'OPTIONS': {
+#           'autocommit': True,
+#         },
+#     }
+# }
+
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'task_app_mgr',
-        'ENGINE': 'mysql.connector.django',
         'USER': 'root',
-        'PASSWORD': '12345',
-        'OPTIONS': {
-          'autocommit': True,
-        },
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 # Password validation
@@ -142,6 +154,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL='/media/'
+MEDIA_ROOT=os.path.join(BASE_DIR,'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

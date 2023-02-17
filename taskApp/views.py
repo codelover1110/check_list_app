@@ -7,7 +7,7 @@ from django.http.response import JsonResponse, HttpResponse
 from rest_framework.parsers import JSONParser
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
-from .serializers import CustomerSerializer, Customer, UserSerializer, WorkspaceSerializer, TeamSerializer, ListSerializer, RelationshipSerializer, Workspace, List, Relationship_tables, TaskSerializer, Task
+from .serializers import CustomerSerializer, Customer, UserSerializer, WorkspaceSerializer, TeamSerializer, ListSerializer, RelationshipSerializer, Workspace, List, Relationship_tables, TaskSerializer, Task, Attachments, AttachmentsSerializer
 
 from rest_framework.decorators import api_view
 
@@ -469,14 +469,33 @@ def create_task(request):
                 task_db_serialize = TaskSerializer(data={
                     "name": json_data['task_name'],
                     "frequency": json_data['frequency'],
-                    "attachments": "attachments",
                     "dute_date": json_data['dute_date'],
-                    # "file_name": json_data['file_name'],
                     "description": json_data['description'],
                 })
 
                 if task_db_serialize.is_valid():
                     task_data = task_db_serialize.save()
+
+                    if 'attachments' in json_data and len(json_data['attachments']) > 0:
+                        for att in json_data['attachments']:
+                            import base64
+                            from django.core.files.base import ContentFile
+                            format, imgstr = att['file'].split(';base64,') 
+                            ext = format.split('/')[-1] 
+                            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+                            
+                            try:
+                                attdb_serialize = AttachmentsSerializer(data={
+                                    'task': task_data.id,
+                                    'file': data,
+                                    'name': att['name']
+                                })
+
+                                if attdb_serialize.is_valid():
+                                    attdb_serialize.save()
+                            except Exception as e:
+                                print(e)
+
                 customer_data = []
                 for t_member in json_data['team_members']:
                     customer = Customer.objects.filter(email=t_member['email'])
@@ -523,6 +542,7 @@ def create_task(request):
                                     relationship_data.priority = json_data['priority']
                                     relationship_data.save()
                         except Exception as e:
+                            print("000000000000000000000")
                             print(e)
                             pass
                     else:
@@ -536,7 +556,7 @@ def create_task(request):
                         "id": task_data.id,
                         "name": json_data['task_name'],
                         "frequency": json_data['frequency'],
-                        "attachments": "attachments",  
+                        # "attachments": "attachments",  
                         "dute_date": json_data['dute_date'],
                         "description": json_data['description'],
                         # "file_name": json_data['file_name'],
@@ -562,10 +582,8 @@ def edit_task(request):
             task_data = Task.objects.get(id=json_data["task_id"])
             task_data.name = json_data['task_name']
             task_data.frequency = json_data['frequency']
-            task_data.attachments = json_data['attachments']
             task_data.dute_date = json_data['dute_date']
             task_data.description = json_data['description']
-            task_data.file_name = json_data['file_name']
             task_data.save()
 
             datas = Relationship_tables.objects.filter(task=json_data['task_id'])
@@ -598,63 +616,73 @@ def remove_task(request):
 def get_task_by_list(request):
     if request.method == 'POST':
         json_data = JSONParser().parse(request)
-        try:
-            relationship_workspace_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'],
-                                                                            list=json_data['list_id'],
-                                                                        )
-            
-            daily_list = []
-            weekly_list = []
-            monthly_list = []
-            task_list = []
-            for data in relationship_workspace_data:
-                if data.task is not None and not data.task.id in task_list:
-                    task_list.append(data.task.id)
-                    relationship_task_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], list=json_data['list_id'], task=data.task.id)                    
-                    members = []
-                    if relationship_task_data.exists():
-                        for task_data in relationship_task_data:
-                            members.append({
-                                "id": task_data.customer.id,
-                                "email": task_data.customer.email,
-                                "first_name": task_data.customer.first_name,
-                                "last_name": task_data.customer.last_name,
-                                "role": task_data.role,
-                            })
-                    
-                    data_detail = {   
-                        "check_status": data.check_status,
-                        "task": {
-                            "id": data.task.id,
-                            "name":  data.task.name,
-                            "frequency": data.task.frequency,
-                            "attachments": "attachments",  
-                            "dute_date": data.task.dute_date,
-                            "description": data.task.description,
-                            "file_name": data.task.file_name,
-                            "priority": data.priority,
-                        },
-                        "members": members
-                    }
+        # try:
+        relationship_workspace_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'],
+                                                                        list=json_data['list_id'],
+                                                                    )
+        
+        daily_list = []
+        weekly_list = []
+        monthly_list = []
+        task_list = []
+        for data in relationship_workspace_data:
+            if data.task is not None and not data.task.id in task_list:
+                task_list.append(data.task.id)
+                relationship_task_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], list=json_data['list_id'], task=data.task.id)                    
+                members = []
+                if relationship_task_data.exists():
+                    for task_data in relationship_task_data:
+                        members.append({
+                            "id": task_data.customer.id,
+                            "email": task_data.customer.email,
+                            "first_name": task_data.customer.first_name,
+                            "last_name": task_data.customer.last_name,
+                            "role": task_data.role,
+                        })
+                
+                file_attachment = []
+                att_db_data = Attachments.objects.filter(task=data.task.id)     
+                if att_db_data.exists():
+                    for att_d in att_db_data:
+                        file_attachment.append({
+                            "file": att_d.file.name,
+                            "name": att_d.name
+                        })
+                
+                data_detail = {   
+                    "check_status": data.check_status,
+                    "task": {
+                        "id": data.task.id,
+                        "name":  data.task.name,
+                        "frequency": data.task.frequency,
+                        "dute_date": data.task.dute_date,
+                        "description": data.task.description,
+                        "priority": data.priority,
+                        "attachments": file_attachment
+                    },
+                    "members": members
+                }
 
-                    if data.task.frequency == 'daily':
-                        daily_list.append(data_detail)
-                    elif data.task.frequency == 'weekly':
-                        weekly_list.append(data_detail)
-                    elif data.task.frequency == 'montly':
-                        monthly_list.append(data_detail)
+                print(file_attachment)
 
-            return JsonResponse({"status": True, "data": {
-                                                    "workspace_id": json_data['workspace_id'],
-                                                    "workspace_name": relationship_workspace_data[0].workspace.name,
-                                                    "list_id": json_data['list_id'],
-                                                    "list_name": relationship_workspace_data[0].list.name,
-                                                    "daily":daily_list,
-                                                    "weekly":weekly_list,
-                                                    "monthly":monthly_list,
-                                                }}, status=status.HTTP_201_CREATED)
-        except:
-            return JsonResponse({"status": False}, status=status.HTTP_400_BAD_REQUEST)
+                if data.task.frequency == 'daily':
+                    daily_list.append(data_detail)
+                elif data.task.frequency == 'weekly':
+                    weekly_list.append(data_detail)
+                elif data.task.frequency == 'montly':
+                    monthly_list.append(data_detail)
+
+        return JsonResponse({"status": True, "data": {
+                                                "workspace_id": json_data['workspace_id'],
+                                                "workspace_name": relationship_workspace_data[0].workspace.name,
+                                                "list_id": json_data['list_id'],
+                                                "list_name": relationship_workspace_data[0].list.name,
+                                                "daily":daily_list,
+                                                "weekly":weekly_list,
+                                                "monthly":monthly_list,
+                                            }}, status=status.HTTP_201_CREATED)
+        # except:
+        #     return JsonResponse({"status": False}, status=status.HTTP_400_BAD_REQUEST)
 
 # @api_view(['POST'])
 # def remove_task(request):
@@ -861,6 +889,15 @@ def get_single_task_id(request):
                     "first_name": data.customer.first_name,
                     "last_name": data.customer.last_name
                 })
+            
+            file_attachment = []
+            att_db_data = Attachments.objects.filter(task=data.task.id)     
+            if att_db_data.exists():
+                for att_d in att_db_data:
+                    file_attachment.append({
+                        "file": att_d.file.name,
+                        "name": att_d.name
+                    })
 
             return JsonResponse({"status": True, "data": {
                     "workspace_id": data.workspace.id,
@@ -871,10 +908,9 @@ def get_single_task_id(request):
                         "task_id": data.task.id,
                         "task_name": data.task.name,
                         "frequency": data.task.frequency,
-                        "attachments": data.task.attachments,
+                        "attachments": file_attachment,
                         "dute_date": data.task.dute_date,
                         "description": data.task.description,
-                        "file_name": data.task.file_name,
                         "priority": data.priority,
                     },
                     "members": members

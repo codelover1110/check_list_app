@@ -1,4 +1,4 @@
-from .models import Customer, Team, Workspace, List, Relationship_tables, Task
+from .models import Customer, Team, Workspace, List, Relationship_tables, Task, Attachments
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
@@ -57,8 +57,15 @@ class TaskSerializer(serializers.ModelSerializer):
         fields = (
                     'name',
                     'frequency',
-                    'attachments',
-                    'file_name',
                     'dute_date',
                     'description',
+                  )
+
+class AttachmentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attachments
+        fields = (
+                    'task',
+                    'file',
+                    'name',
                   )

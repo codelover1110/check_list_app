@@ -3,6 +3,9 @@ from django.urls import include, re_path as url
 from . import views
 from django.urls import path
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 admin.site.site_title = "Qatar Foundation"
 admin.site.site_header = "Admin Panel"
 admin.site.index_title = "Welcome to the portal"
@@ -47,3 +50,4 @@ urlpatterns = [
     url(r'^api/invite_member_workspace$', views.invite_member_workspace),
 
 ]
+urlpatterns+=static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

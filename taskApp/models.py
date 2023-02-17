@@ -29,10 +29,15 @@ class List(models.Model):
 class Task(models.Model):
     name = models.CharField(max_length=350, blank=True, default='')
     frequency = models.CharField(max_length=350, blank=True, default='')
-    attachments = models.CharField(max_length=350, blank=True, default='')
-    file_name = models.CharField(max_length=350, blank=True, default='')
+    # attachments = models.CharField(max_length=350, blank=True, default='')
+    # file_name = models.CharField(max_length=350, blank=True, default='')
     dute_date = models.DateField(default='', null=True)
     description = models.CharField(max_length=350, blank=True, default='')
+
+class Attachments(models.Model):
+    task = models.ForeignKey(Task, related_name='task_id', on_delete=models.CASCADE, blank=True, null=True)
+    file = models.FileField(upload_to='media/', max_length=254, blank=True, default='')
+    name = models.CharField(max_length=350, blank=True, default='')
 
 class Relationship_tables(models.Model):
     workspace = models.ForeignKey(Workspace, related_name='workspace', on_delete=models.CASCADE, blank=True,
