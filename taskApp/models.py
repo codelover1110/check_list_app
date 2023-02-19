@@ -28,10 +28,8 @@ class List(models.Model):
 
 class Task(models.Model):
     name = models.CharField(max_length=350, blank=True, default='')
-    frequency = models.CharField(max_length=350, blank=True, default='')
-    # attachments = models.CharField(max_length=350, blank=True, default='')
-    # file_name = models.CharField(max_length=350, blank=True, default='')
-    dute_date = models.DateField(default='', null=True)
+    frequency = models.CharField(max_length=350, blank=True, default='', null=True)
+    dute_date = models.DateField(blank= True,null=True)
     description = models.CharField(max_length=350, blank=True, default='')
 
 class Attachments(models.Model):

@@ -492,8 +492,16 @@ def create_task(request):
     if request.method == 'POST':
         json_data = JSONParser().parse(request)
         
-        frequency_data = json_data['frequency']  if "frequency" in json_data else ''
-        dute_date_data = json_data['dute_date']  if "dute_date" in json_data else ''
+        if not "frequency" in json_data or json_data['frequency'] == '':
+            frequency_data = None
+        else:
+            frequency_data = json_data['frequency']
+
+        
+        if not "dute_date" in json_data or json_data['dute_date'] == '':
+            dute_date_data = None
+        else:
+            dute_date_data = json_data['dute_date']
 
         try:
             relation_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], list=json_data['list_id'])
@@ -597,7 +605,7 @@ def create_task(request):
                 
             else:
                 return JsonResponse({"status": False, "message": "Workspace or List doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
-                
+            
         except:
             return JsonResponse({"status": False, "message": "Invaild data"}, status=status.HTTP_400_BAD_REQUEST)
 
