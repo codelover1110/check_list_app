@@ -168,14 +168,15 @@ def get_workspace_for_user(request):
 
                 if not d.task is None and not d.task.id in total_tasks and d.customer.email == json_data['email']:
                     total_tasks.append(d.task.id)
-
-            if len(total_lists) > 0:
+            
+            if len(datas_workspace) > 0 and datas_workspace[0].customer.email == json_data['email']:
                 data.append({
-                    "workspace_id": workspace.id,
-                    "workspace_name": workspace.name,
-                    "total_lists": len(total_lists),
-                    "total_tasks": len(total_tasks)
-                })
+                        "workspace_id": workspace.id,
+                        "workspace_name": workspace.name,
+                        "total_lists": len(total_lists),
+                        "total_tasks": len(total_tasks)
+                    })
+                
         return JsonResponse({"status": True, "data": data}, status=status.HTTP_201_CREATED)
 
 
