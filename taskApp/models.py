@@ -30,7 +30,7 @@ class Task(models.Model):
     name = models.CharField(max_length=350, blank=True, default='')
     frequency = models.CharField(max_length=350, blank=True, default='', null=True)
     dute_date = models.DateField(blank= True,null=True)
-    description = models.CharField(max_length=350, blank=True, default='')
+    description = models.CharField(max_length=350, blank=True, default='', null=True)
 
 class Attachments(models.Model):
     task = models.ForeignKey(Task, related_name='task_id', on_delete=models.CASCADE, blank=True, null=True)

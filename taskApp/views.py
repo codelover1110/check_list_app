@@ -151,33 +151,89 @@ def get_all_workspaces(request):
             })
         return JsonResponse({"status": True, "data": data}, status=status.HTTP_201_CREATED)
 
+@api_view(['GET'])
+def get_all_users(request):
+    if request.method == 'GET':
+        workspaces= Workspace.objects.all()
+        data = []
+        for workspace in workspaces:
+            return_data = {
+                "workspace_id": workspace.id,
+                "workspace_name": workspace.name,
+                "members": []
+            }
+            relationship_data = Relationship_tables.objects.filter(workspace=workspace.id)
+            if relationship_data.exists():
+                id_list = []
+                for r_data in relationship_data:
+                    if not r_data.customer.id in id_list:
+                        id_list.append(r_data.customer.id)
+                        if r_data.customer.first_name != "":
+                            invite_status = "Invite Accepted"
+                        else:
+                            invite_status = "Invite Sent"
+                        return_data["members"].append({
+                            "member_id": r_data.customer.id,
+                            "member_email": r_data.customer.email,
+                            "member_first_name": r_data.customer.first_name,
+                            "member_last_name": r_data.customer.last_name,
+                            "invite_status": invite_status,
+                            "member_role": r_data.role,
+                        })
+            
+            data.append(return_data)
+
+        return JsonResponse({"status": True, "data": data}, status=status.HTTP_201_CREATED)
+
+@api_view(['POST'])
+def remove_user(request):
+    if request.method == 'POST':
+        json_data = JSONParser().parse(request)
+        customer_d = Customer.objects.get(email=json_data['email'])
+        try:
+            datas = Relationship_tables.objects.filter(workspace=json_data["workspace_id"], customer=customer_d.id)
+            if datas.exists():
+                for data in datas:
+                    data.delete()
+                return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
+            else:
+                return JsonResponse({"status": False, "message": "User doesn't exist in the current Workspace"}, status=status.HTTP_400_BAD_REQUEST)
+        except:
+            return JsonResponse({"status": False, "message": "Workspace doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
+       
+
 @api_view(['POST'])
 def get_workspace_for_user(request):
     if request.method == 'POST':
         workspaces= Workspace.objects.all()
         data = []
         json_data = JSONParser().parse(request)
-        for workspace in workspaces:
-            datas_workspace = Relationship_tables.objects.filter(workspace= workspace.id)
-            total_lists = []
-            total_tasks = []
+        try:
+            customer_data = Customer.objects.get(email=json_data['email'])
+            for workspace in workspaces:
+                datas_workspace = Relationship_tables.objects.filter(workspace= workspace.id, customer=customer_data.id)
+                if datas_workspace.exists():
+                    total_lists = []
+                    total_tasks = []
 
-            for d in datas_workspace:
-                if not d.list is None and not d.list.id in total_lists and d.customer.email == json_data['email']:
-                    total_lists.append(d.list.id)
+                    for d in datas_workspace:
+                        if not d.list is None and not d.list.id in total_lists:
+                            total_lists.append(d.list.id)
 
-                if not d.task is None and not d.task.id in total_tasks and d.customer.email == json_data['email']:
-                    total_tasks.append(d.task.id)
-            
-            if len(datas_workspace) > 0 and datas_workspace[0].customer.email == json_data['email']:
-                data.append({
-                        "workspace_id": workspace.id,
-                        "workspace_name": workspace.name,
-                        "total_lists": len(total_lists),
-                        "total_tasks": len(total_tasks)
-                    })
-                
-        return JsonResponse({"status": True, "data": data}, status=status.HTTP_201_CREATED)
+                        if not d.task is None and not d.task.id in total_tasks:
+                            total_tasks.append(d.task.id)
+                    
+                        data.append({
+                                "workspace_id": workspace.id,
+                                "workspace_name": workspace.name,
+                                "total_lists": len(total_lists),
+                                "total_tasks": len(total_tasks)
+                            })
+                    
+            return JsonResponse({"status": True, "data": data}, status=status.HTTP_201_CREATED)
+        except:
+            return JsonResponse({"status": False, "message": "User doesn't exsit."}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['POST'])
