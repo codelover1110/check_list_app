@@ -548,6 +548,11 @@ def create_task(request):
     if request.method == 'POST':
         json_data = JSONParser().parse(request)
         
+        if not "description" in json_data or json_data['description'] == '':
+            description_data = None
+        else:
+            description_data = json_data['description']
+        
         if not "frequency" in json_data or json_data['frequency'] == '':
             frequency_data = None
         else:
@@ -566,7 +571,7 @@ def create_task(request):
                     "name": json_data['task_name'],
                     "frequency": frequency_data,
                     "dute_date": dute_date_data,
-                    "description": json_data['description'],
+                    "description": description_data,
                 })
 
                 if task_db_serialize.is_valid():
@@ -652,7 +657,7 @@ def create_task(request):
                         "name": json_data['task_name'],
                         "frequency": frequency_data,
                         "dute_date": dute_date_data,
-                        "description": json_data['description'],
+                        "description": description_data,
                         "priority": json_data['priority']
                     },
                     "members": customer_data
