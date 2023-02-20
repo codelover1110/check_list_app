@@ -151,22 +151,29 @@ def get_all_workspaces(request):
             })
         return JsonResponse({"status": True, "data": data}, status=status.HTTP_201_CREATED)
 
-@api_view(['GET'])
+@api_view(['POST'])
 def get_all_users(request):
-    if request.method == 'GET':
-        workspaces= Workspace.objects.all()
+    if request.method == 'POST':
+        json_data = JSONParser().parse(request)        
         data = []
-        for workspace in workspaces:
+        try:
+            customer_d = Customer.objects.get(email=json_data['email'])
+        except:
+            return JsonResponse({"status": False, "message": "User doesn't exist."}, status=status.HTTP_400_BAD_REQUEST)
+        relationship_data= Relationship_tables.objects.filter(customer=customer_d.id)
+        
+        for r_d in relationship_data:
             return_data = {
-                "workspace_id": workspace.id,
-                "workspace_name": workspace.name,
+                "workspace_id": r_d.workspace.id,
+                "workspace_name": r_d.workspace.name,
                 "members": []
             }
-            relationship_data = Relationship_tables.objects.filter(workspace=workspace.id)
+            relationship_data = Relationship_tables.objects.filter(workspace=r_d.workspace.id)
             if relationship_data.exists():
                 id_list = []
                 for r_data in relationship_data:
-                    if not r_data.customer.id in id_list:
+                    invite_status = "Invite Sent"
+                    if not r_data.customer is None and not r_data.customer.id in id_list:
                         id_list.append(r_data.customer.id)
                         if r_data.customer.first_name != "":
                             invite_status = "Invite Accepted"
@@ -184,6 +191,8 @@ def get_all_users(request):
             data.append(return_data)
 
         return JsonResponse({"status": True, "data": data}, status=status.HTTP_201_CREATED)
+       
+
 
 @api_view(['POST'])
 def remove_user(request):
@@ -357,7 +366,7 @@ def get_workspace_users(request):
             if relationship_data.exists():
                 id_list = []
                 for data in relationship_data:
-                    if not data.customer.id in id_list:
+                    if not data.customer is None and  not data.customer.id in id_list:
                         id_list.append(data.customer.id)
                         return_data.append({
                             "member_id": data.customer.id,
@@ -385,50 +394,59 @@ def create_list(request):
                 if list_db_serialize.is_valid():
                     list_data = list_db_serialize.save()
                 members = []
-                for t_member in json_data['team_members']:
-                    customer = Customer.objects.filter(email=t_member['email'])
-                    if customer.exists():
-                        try:
-                            relationship_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], customer=customer[0].id)
-                            if not relationship_data.exists():
-                                relationship_serialize = RelationshipSerializer(data={
-                                    "customer": customer[0].id,
-                                    "workspace": json_data['workspace_id'],
-                                    "list": list_data.id,
-                                    # "role": relationship_data[0].role
-                                    })
-                                if relationship_serialize.is_valid():
-                                    relationship_serialize.save()
-                            elif relationship_data.exists() and len(relationship_data) > 1:
-                                relationship_serialize = RelationshipSerializer(data={
-                                    "customer": customer[0].id,
-                                    "workspace": json_data['workspace_id'],
-                                    "list": list_data.id,
-                                    "role": relationship_data[0].role
-                                    })
-                                if relationship_serialize.is_valid():
-                                    relationship_serialize.save()
-                            else:
-                                relationship_data = Relationship_tables.objects.get(workspace=json_data['workspace_id'], customer=customer[0].id)
-                                if relationship_data.list is not None:
+                if not 'team_members' in json_data or len(json_data['team_members']) == 0:
+                    relationship_serialize = RelationshipSerializer(data={
+                        "workspace": json_data['workspace_id'],
+                        "list": list_data.id,
+                        })
+                    if relationship_serialize.is_valid():
+                        relationship_serialize.save()
+
+                else:
+                    for t_member in json_data['team_members']:
+                        customer = Customer.objects.filter(email=t_member['email'])
+                        if customer.exists():
+                            try:
+                                relationship_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], customer=customer[0].id)
+                                if not relationship_data.exists():
                                     relationship_serialize = RelationshipSerializer(data={
                                         "customer": customer[0].id,
                                         "workspace": json_data['workspace_id'],
                                         "list": list_data.id,
-                                        "role": relationship_data.role
+                                        # "role": relationship_data[0].role
                                         })
-                                    
+                                    if relationship_serialize.is_valid():
+                                        relationship_serialize.save()
+                                elif relationship_data.exists() and len(relationship_data) > 1:
+                                    relationship_serialize = RelationshipSerializer(data={
+                                        "customer": customer[0].id,
+                                        "workspace": json_data['workspace_id'],
+                                        "list": list_data.id,
+                                        "role": relationship_data[0].role
+                                        })
                                     if relationship_serialize.is_valid():
                                         relationship_serialize.save()
                                 else:
-                                    relationship_data.list = list_data
-                                    relationship_data.save()
-                            members.append(t_member['email'])
-                        except Exception as e:
-                            print(e)
-                            pass
-                    else:
-                        continue
+                                    relationship_data = Relationship_tables.objects.get(workspace=json_data['workspace_id'], customer=customer[0].id)
+                                    if relationship_data.list is not None:
+                                        relationship_serialize = RelationshipSerializer(data={
+                                            "customer": customer[0].id,
+                                            "workspace": json_data['workspace_id'],
+                                            "list": list_data.id,
+                                            "role": relationship_data.role
+                                            })
+                                        
+                                        if relationship_serialize.is_valid():
+                                            relationship_serialize.save()
+                                    else:
+                                        relationship_data.list = list_data
+                                        relationship_data.save()
+                                members.append(t_member['email'])
+                            except Exception as e:
+                                print(e)
+                                pass
+                        else:
+                            continue
                 
                 return JsonResponse({"status": True, "data": {"list_id": list_data.id, "list_name": list_data.name, "members": members}}, status=status.HTTP_201_CREATED)
             else:
@@ -479,7 +497,7 @@ def get_list_users(request):
             return_data = []
             id_list = []
             for data in relationship_workspace_data:
-                if not data.customer.id in id_list:
+                if not data.customer is None and not data.customer.id in id_list:
                     id_list.append(data.customer.id)
                     return_data.append({
                         "member_id": data.customer.id,
@@ -602,46 +620,62 @@ def create_task(request):
                     customer = Customer.objects.filter(email=t_member['email'])
                     if customer.exists():
                         try:
-                            relationship_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], customer=customer[0].id, list=json_data['list_id'])   
-                            workspace_name = relationship_data[0].workspace.name                        
-                            list_name = relationship_data[0].list.name  
-                            customer_data.append({
-                                "id": customer[0].id,
-                                "email": customer[0].email,
-                                "first_name": customer[0].first_name,
-                                "last_name": customer[0].last_name,
-                            })     
-
-                            if relationship_data.exists() and len(relationship_data) > 1:
+                            tasks_relationship = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], list=json_data['list_id'], customer__isnull=True)
+                            if tasks_relationship.exists():
+                                workspace_name = tasks_relationship[0].workspace.name     
+                                list_name = tasks_relationship[0].list.name  
                                 relationship_serialize = RelationshipSerializer(data={
                                     "customer": customer[0].id,
                                     "workspace": json_data['workspace_id'],
                                     "list": json_data['list_id'],
                                     "task": task_data.id,
-                                    "role": relationship_data[0].role,
+                                    "role": tasks_relationship[0].role,
                                     "priority": json_data['priority']
                                     })
                                 if relationship_serialize.is_valid():
                                     relationship_serialize.save()
-
+                            
                             else:
-                                relationship_data = Relationship_tables.objects.get(workspace=json_data['workspace_id'], customer=customer[0].id, list=json_data['list_id'])                           
+                                relationship_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], customer=customer[0].id, list=json_data['list_id'])   
+                                workspace_name = relationship_data[0].workspace.name                        
+                                list_name = relationship_data[0].list.name  
+                                customer_data.append({
+                                    "id": customer[0].id,
+                                    "email": customer[0].email,
+                                    "first_name": customer[0].first_name,
+                                    "last_name": customer[0].last_name,
+                                })     
 
-                                if relationship_data.task is not None:
+                                if relationship_data.exists() and len(relationship_data) > 1:
                                     relationship_serialize = RelationshipSerializer(data={
                                         "customer": customer[0].id,
                                         "workspace": json_data['workspace_id'],
                                         "list": json_data['list_id'],
                                         "task": task_data.id,
-                                        "role": relationship_data.role,
+                                        "role": relationship_data[0].role,
                                         "priority": json_data['priority']
                                         })
                                     if relationship_serialize.is_valid():
                                         relationship_serialize.save()
-                                else:  
-                                    relationship_data.task = task_data
-                                    relationship_data.priority = json_data['priority']
-                                    relationship_data.save()
+
+                                else:
+                                    relationship_data = Relationship_tables.objects.get(workspace=json_data['workspace_id'], customer=customer[0].id, list=json_data['list_id'])                           
+
+                                    if relationship_data.task is not None:
+                                        relationship_serialize = RelationshipSerializer(data={
+                                            "customer": customer[0].id,
+                                            "workspace": json_data['workspace_id'],
+                                            "list": json_data['list_id'],
+                                            "task": task_data.id,
+                                            "role": relationship_data.role,
+                                            "priority": json_data['priority']
+                                            })
+                                        if relationship_serialize.is_valid():
+                                            relationship_serialize.save()
+                                    else:  
+                                        relationship_data.task = task_data
+                                        relationship_data.priority = json_data['priority']
+                                        relationship_data.save()
                         except Exception as e:
                             print(e)
                             pass
@@ -754,6 +788,7 @@ def get_task_by_list(request):
         daily_list = []
         weekly_list = []
         monthly_list = []
+        no_option = []
         task_list = []
         for data in relationship_workspace_data:
             if data.task is not None and not data.task.id in task_list:
@@ -801,6 +836,8 @@ def get_task_by_list(request):
                     weekly_list.append(data_detail)
                 elif data.task.frequency == 'montly':
                     monthly_list.append(data_detail)
+                else:
+                    no_option.append(data_detail)
 
         return JsonResponse({"status": True, "data": {
                                                 "workspace_id": json_data['workspace_id'],
@@ -810,6 +847,7 @@ def get_task_by_list(request):
                                                 "daily":daily_list,
                                                 "weekly":weekly_list,
                                                 "monthly":monthly_list,
+                                                "no_option": no_option
                                             }}, status=status.HTTP_201_CREATED)
         # except:
         #     return JsonResponse({"status": False}, status=status.HTTP_400_BAD_REQUEST)
@@ -850,7 +888,7 @@ def get_list(request, pk):
                     for t_data in tasks_relationship:
                         if not t_data.task.id in total_tasks:
                             total_tasks.append(t_data.task.id)
-                            if t_data.priority == 'success':
+                            if t_data.check_status == True:
                                 success_tasks.append(t_data.task.id)
 
                     # success_tasks = Relationship_tables.objects.filter(workspace=pk, list=data.list.id, priority='success').count()
@@ -939,7 +977,14 @@ def check_off(request):
         json_data = JSONParser().parse(request)
         datas = Relationship_tables.objects.all()
         for data in datas:
-            if not data.task is None and data.task.frequency == json_data['frequency'] and data.workspace.id == json_data['workspace_id'] and data.list.id == json_data['list_id']:
+            if json_data['frequency'] == 'no_option' and not data.task is None and data.task.frequency is None and data.workspace.id == json_data['workspace_id'] and data.list.id == json_data['list_id']:
+                if json_data['check_status'] == False:
+                    data.check_status = 0
+                else:
+                    data.check_status = 1
+                data.save()
+
+            elif not data.task is None and data.task.frequency == json_data['frequency'] and data.workspace.id == json_data['workspace_id'] and data.list.id == json_data['list_id']:
                 if json_data['check_status'] == False:
                     data.check_status = 0
                 else:
@@ -964,7 +1009,7 @@ def get_single_workspace_id(request):
                         number_list.append(data.list.id)
                     if data.task is not None and not data.task.id in number_of_task:
                         number_of_task.append(data.task.id)
-                        if data.priority == 'success':
+                        if data.check_status == True:
                             number_of_successs_task.append(data.task.id)
                 
             return JsonResponse({"status": True, "data": {
@@ -991,8 +1036,12 @@ def get_single_list_id(request):
                 for data in relationship_workspace_data:
                     if data.task is not None and not data.task.id in number_of_task:
                         number_of_task.append(data.task.id)
-                        if data.priority == 'success':
+                        # if data.priority == 'success':
+                        if data.check_status == True:
                             number_of_successs_task.append(data.task.id)
+            
+            if not relationship_workspace_data.exists():
+                return JsonResponse({"status": False, "message": "Invalid List"}, status=status.HTTP_400_BAD_REQUEST)
                 
             return JsonResponse({"status": True, "data": {
                                     "workspace_id": json_data['workspace_id'],
