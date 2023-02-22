@@ -531,12 +531,12 @@ def submit_list(request):
                         try:
                             relationship_data = Relationship_tables.objects.get(
                                 workspace=json_data['workspace_id'],
-                                customer=work_data["member"]["id"], 
+                                # customer=work_data["member"]["id"], 
                                 task=work_data["task"]["id"], 
                                 list=json_data['list_id'])                           
                             
-                            relationship_data.priority = work_data["task"]["priority"]
-                            relationship_data.save()
+                            # relationship_data.priority = work_data["task"]["priority"]
+                            # relationship_data.save()
 
                             data = {
                                 "workspace_name": relationship_data.workspace.name,
