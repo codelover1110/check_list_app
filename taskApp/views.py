@@ -7,7 +7,7 @@ from django.http.response import JsonResponse, HttpResponse
 from rest_framework.parsers import JSONParser
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
-from .serializers import CustomerSerializer, Customer, UserSerializer, WorkspaceSerializer, TeamSerializer, ListSerializer, RelationshipSerializer, Workspace, List, Relationship_tables, TaskSerializer, Task, Attachments, AttachmentsSerializer
+from .serializers import CustomerSerializer, Customer, UserSerializer, WorkspaceSerializer, TeamSerializer, ListSerializer, RelationshipSerializer, Workspace, List, Relationship_tables, TaskSerializer, Task, Attachments, AttachmentsSerializer, SubmittedList, SubmittedSerializer
 
 from rest_framework.decorators import api_view
 
@@ -545,11 +545,29 @@ def submit_list(request):
                 "submit_user": "Submit User"
             }
 
-            send_approval_notification(data, 'codelover93@outlook.com')
-            send_approval_notification(data, 'zach@axe.studio')
+            # send_approval_notification(data, 'codelover93@outlook.com')
+            # send_approval_notification(data, 'zach@axe.studio')
+            submitlist_serialize = SubmittedSerializer(data={
+                "submit_log": json_data
+            })
+            if submitlist_serialize.is_valid():
+                submitlist_serialize.save()
             return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
         except:
             return JsonResponse({"status": False, "message": "Failure Sending Email"}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def get_submitted_list(request):
+    if request.method == 'GET':
+        datas = SubmittedList.objects.all()
+        return_data = []
+        if datas.exists():
+            return_data = []
+            for data in datas:
+                return_data.append(data.submit_log)
+        else:
+            return JsonResponse({"status": True, "data": []}, status=status.HTTP_201_CREATED)
+        return JsonResponse({"status": True, "data": return_data}, status=status.HTTP_201_CREATED)
 
 
 

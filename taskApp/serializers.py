@@ -1,4 +1,4 @@
-from .models import Customer, Team, Workspace, List, Relationship_tables, Task, Attachments
+from .models import Customer, Team, Workspace, List, Relationship_tables, Task, Attachments, SubmittedList
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
@@ -68,4 +68,11 @@ class AttachmentsSerializer(serializers.ModelSerializer):
                     'task',
                     'file',
                     'name',
+                  )
+
+class SubmittedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubmittedList
+        fields = (
+                    'submit_log',
                   )

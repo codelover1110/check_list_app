@@ -50,5 +50,7 @@ class Relationship_tables(models.Model):
     priority = models.CharField(max_length=350, blank=True, default='')
     check_status= models.BooleanField(default=0)
     
-
+class SubmittedList(models.Model):
+   submit_log = models.JSONField(null=False)
+#    submit_log = models.TextField(null=False)
 
