@@ -224,6 +224,19 @@ def get_workspace_for_user(request):
                 if datas_workspace.exists():
                     total_lists = []
                     total_tasks = []
+                    members = []
+                    members_id = []
+
+                    datas_members = Relationship_tables.objects.filter(workspace= workspace.id)
+                    for d_member in datas_members:
+                        if not d_member.customer is None and not d_member.customer.id in members_id:
+                            members_id.append(d_member.customer.id)
+                            members.append({
+                                "id": d_member.customer.id,
+                                "email": d_member.customer.email,
+                                "first_name": d_member.customer.first_name,
+                                "last_name": d_member.customer.last_name
+                            })
 
                     for d in datas_workspace:
                         if not d.list is None and not d.list.id in total_lists:
@@ -232,12 +245,13 @@ def get_workspace_for_user(request):
                         if not d.task is None and not d.task.id in total_tasks:
                             total_tasks.append(d.task.id)
                     
-                        data.append({
-                                "workspace_id": workspace.id,
-                                "workspace_name": workspace.name,
-                                "total_lists": len(total_lists),
-                                "total_tasks": len(total_tasks)
-                            })
+                    data.append({
+                            "workspace_id": workspace.id,
+                            "workspace_name": workspace.name,
+                            "total_lists": len(total_lists),
+                            "total_tasks": len(total_tasks),
+                            "members": members
+                        })
                     
             return JsonResponse({"status": True, "data": data}, status=status.HTTP_201_CREATED)
         except:
