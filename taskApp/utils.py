@@ -44,8 +44,8 @@ def send_invite_member(data, user_email):
     send_mail(subject, message, email_from, recipient_list )
 
 def send_approval_notification(data, user_email):
-    subject = f"Hi, It is for approval. Workspace - {data['workspace_name']}, List - {data['list_name']}"
-    message = f"http://34.67.86.53:8000/ \n\nChecklist Website: Please signin."
+    subject = f"Hi, Admin. It is for approval from {data['submit_user']}"
+    message = f"Workspace: {data['workspace_name']}, List: {data['list_name']} https://checkcheckgoose.com/workspace/{data['workspace_id']}/list/{data['list_id']}/approve-tasks \n\nChecklist"
     email_from = settings.EMAIL_HOST_USER
     recipient_list = [user_email,]
     print (' +++++ verification code for {}: {}'.format(user_email, data))
