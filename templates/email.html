@@ -1,0 +1,111 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+		.description > * {
+			text-overflow: ellipsis;
+			overflow: hidden;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+		}
+		.description > * * {
+			display: none !important;
+		}
+		.description > * > p ,
+		.description a,
+		.description span,
+		.description strong,
+		.description > * > p
+		{
+			display: inline !important;
+		}
+	</style>
+</head>
+<body style="margin: 0;background-color: #0D0D0D;">
+	<table cellspacing="0" cellpadding="0" width="600" style="width: 100%;background-size: cover;margin: 0 auto;padding-bottom: 1rem;">
+		<tbody style="display:table-row-group;vertical-align:middle;">
+			<tr style="display:table-row;vertical-align:inherit;">
+				<td style="padding: 1rem 0 1.2rem 0;text-align: center;background-color: #0D0D0D;font-size: 30px;color: #FFFFFF;font-family: Zilla Slab; font-weight: 700;">
+					<a href="https://tailgate.live">
+						<img src="https://tailgate.live/_nuxt/public/tail.png" width="200">
+					</a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<table cellspacing="0" cellpadding="0" style="width: 100%; max-width: 480px;margin: 0 auto; padding-bottom: 20px;padding-top: 20px;">
+		<tr style="display:table-row;vertical-align:inherit;border-color:inherit">
+			<td style="padding-left:5px;font-size: 20px;line-height: 32px;font-family: Arial, Helvetica, sans-serif;font-style: normal;font-weight: normal;text-align: left;">
+				<div style="background: rgba(222, 59, 64, 1);height: 6px;width: 40px;left: 185px;border-radius: 0px;display: inline-block;"></div>
+				<div style="font-size: 22px; font-weight: 700; line-height: 41px;padding-left:5px;display:inline-block;vertical-align: middle;font-family: Zilla Slab;color: #FFFFFF;">
+					Hey there!
+				</div>
+			</td>
+		</tr>
+	</table>
+	<table cellspacing="0" cellpadding="0" style="width: 100%; max-width: 480px;margin: 0 auto 50px auto; border-collapse:separate;border-color:gray;border-spacing:0;background: linear-gradient( 347.54deg, rgba(255, 255, 255, 0.01) 8.65%, rgba(255, 255, 255, 0.03) 8.67%, rgba(255, 255, 255, 0.19) 224.51%, rgba(255, 255, 255, 0.08) 224.51%);border-radius: 8px;padding-bottom: 20px;padding-top: 20px;padding-left: 20px;padding-right: 20px;">
+		<tr style="display:table-row;vertical-align:inherit;border-color:inherit">
+			<td style="opacity: 0.8; font-size: 16px;line-height: 28px;font-family: Arial, Helvetica, sans-serif;padding-top: 2rem;padding-bottom: 2rem;font-style: normal;font-weight: normal;text-align: left;color: #FFFFFF;">
+				We've got your daily dose of College Football news! If an article below looks interesting click "Read Full Article" and we'll send you to Tailgate.live to read the full article. As always if you have any questions email us at hey@tailgate.live
+			</td>
+		</tr>
+	</table>
+	{% for item in blogdata %}
+		<table cellspacing="0" cellpadding="0" style="width: 100%; max-width: 480px;margin: 0 auto 50px auto; border-collapse:separate;border-color:gray;border-spacing:0;background: linear-gradient( 347.54deg, rgba(255, 255, 255, 0.01) 8.65%, rgba(255, 255, 255, 0.03) 8.67%, rgba(255, 255, 255, 0.19) 224.51%, rgba(255, 255, 255, 0.08) 224.51%);border-radius: 8px;padding-bottom: 20px;padding-top: 20px;padding-left: 20px;padding-right: 20px;">
+			<tr style="display:table-row;vertical-align:inherit;border-color:inherit">
+				<td style="font-family: Arial, Helvetica, sans-serif;font-size: 14px;font-weight: 600;color: #FFFFFF;">
+					{{item.team_name}}
+				</td>
+			</tr>
+			<tr style="display:table-row;vertical-align:inherit;border-color:inherit">
+				<td style="font-size: 22px; font-weight: 700; line-height: 30px;font-family: Arial, Helvetica, sans-serif;padding-top: 1.5rem;padding-bottom: 1rem;font-style: normal;text-align: left;font-family: Zilla Slab;color: #FFFFFF;">
+					{{item.title}}
+				</td>
+			</tr>
+			<tr style="display:table-row;vertical-align:inherit;border-color:inherit">
+				<td class="description" style="font-size: 14px; font-weight: 500; line-height: 28px;font-family: Arial, Helvetica, sans-serif;padding-bottom: 1rem;font-style: normal;text-align: left;font-family: Zilla Slab;color: #FFFFFF;opacity: 0.8;">
+					<!-- {{item.content}} -->
+					{% autoescape off %}
+						{{ item.content }}
+					{% endautoescape %}
+				</td>
+			</tr>
+			{% if item.banner_img is not null %}
+			<tr style="display:table-row;vertical-align:inherit;border-color:inherit">
+				<td style="font-size: 16px;line-height: 28px;font-family: Arial, Helvetica, sans-serif;font-style: normal;font-weight: normal;text-align: left;">
+					<img src="{{item.banner_img}}" alt="" style="width: 100%; height: 100%; max-height: 236px; border-radius: 4px;">
+				</td>
+			</tr>
+			{% endif %}
+			{% if item.banner_img is null %}
+			<tr style="display:table-row;vertical-align:inherit;border-color:inherit">
+				<td style="font-size: 16px;line-height: 28px;font-family: Arial, Helvetica, sans-serif;font-style: normal;font-weight: normal;text-align: left;">
+					<img src="" alt="" style="background-color: #D9D9D9; width: 100%; height: 100%; max-height: 236px; border-radius: 4px;">
+					<img src="http://tailgate.live/_nuxt/public/no_photo_available.png" alt="" style="width: 100%; height: 100%; max-height: 236px; border-radius: 4px;">
+				</td>
+			</tr>
+			{% endif %}
+			<tr style="display:table-row;vertical-align:inherit;border-color:inherit">
+				<td style="padding-top: 2rem;">
+					{% if item.school_name == "cfb" %}
+					<button style="padding: 9.5px 36px 9.5px 36px;align-items: center;background: #DE3B40;border: none;border-radius: 4px;font-family: Zilla Slab;font-style: normal;font-weight: 700;font-size: 16px;line-height: 140%;text-align: center;"><a href="http://tailgate.live/article/{{item.title}}" style="text-decoration: none; cursor: pointer; color: #fff;">Read Full Article</a></button>
+					{% endif %}
+					{% if item.school_name != "cfb" %}
+					<button style="padding: 9.5px 36px 9.5px 36px;align-items: center;background: #DE3B40;border: none;border-radius: 4px;font-family: Zilla Slab;font-style: normal;font-weight: 700;font-size: 16px;line-height: 140%;text-align: center;"><a href="http://tailgate.live/{{item.school_name}}/article/{{item.title}}" style="text-decoration: none; cursor: pointer; color: #fff;">Read Full Article</a></button>
+					{% endif %}
+				</td>
+			</tr>
+		</table>
+	{% endfor %}
+	<table cellspacing="0" cellpadding="0" style="width: 100%; max-width: 480px;margin: 0 auto;padding-top: 2rem;padding-bottom: 2rem;border-top: 1px solid gray;">
+		<tr style="display:table-row;vertical-align:inherit;border-color:inherit">
+			<td style="color: #595959;font-family: Arial, Helvetica, sans-serif;font-weight: 500">Tailgate.live - Built by Axe</td>
+			<td style="color: #595959;font-family: Arial, Helvetica, sans-serif;font-weight: 500;text-align: right">Unsubscribe</td>
+		</tr>
+	</table>
+</body>
+</html>

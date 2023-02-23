@@ -88,3 +88,22 @@ def send_welcome_email(payment_link, user_email):
     #           "html": message})
 
 
+def send_approval_notification_mailgun(data):
+    template = loader.get_template('welcome.html')
+    context = {"name": data['submit_user'], "selected_team": data['submit_user'], }
+    message = template.render(context)
+    email_from = settings.EMAIL_HOST_USER
+    recipient_list = ['codelover93@outlook.com',]
+
+    subject = f"Hi, Admin. It is for approval from {data['submit_user']}"
+    # send_mail(subject, message, email_from, recipient_list )
+
+    return requests.post(
+        "https://api.mailgun.net/v3/tailgate.live/messages",
+        auth=("api", "d32f998708037a38e350e7eba0d64cba-18e06deb-8000efa8"),
+        data={"from": "Tailgate.Live <hey@tailgate.live>",
+              "to": [data['email']],
+              "subject": "Welcome to Tailgate.live, thank you for subscribing!",
+              "html": message})
+
+

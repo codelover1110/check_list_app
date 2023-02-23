@@ -17,7 +17,7 @@ import random
 import string
 from datetime import datetime
 
-from .utils import send_email, send_verify_code, send_email_teammember, send_welcome_email, send_invite_member, send_approval_notification
+from .utils import send_email, send_verify_code, send_email_teammember, send_welcome_email, send_invite_member, send_approval_notification, send_approval_notification_mailgun
 
 # Create your views here.
 class UserViewSet(viewsets.ModelViewSet):
@@ -536,25 +536,27 @@ def get_list_users(request):
 def submit_list(request):
     if request.method == 'POST':
         json_data = JSONParser().parse(request)
-        try:
-            data = {
-                "workspace_name": json_data['workspace_name'],
-                "list_name": json_data['list_name'],
-                "list_id": json_data['list_id'],
-                "workspace_id": json_data['workspace_id'],
-                "submit_user": "Submit User"
-            }
+        # try:
+        data = {
+            "workspace_name": json_data['workspace_name'],
+            "list_name": json_data['list_name'],
+            "list_id": json_data['list_id'],
+            "workspace_id": json_data['workspace_id'],
+            "submit_user": "Submit User",
+            "email": "codelover93@outlook.com"
+        }
 
-            # send_approval_notification(data, 'codelover93@outlook.com')
-            # send_approval_notification(data, 'zach@axe.studio')
-            submitlist_serialize = SubmittedSerializer(data={
-                "submit_log": json_data
-            })
-            if submitlist_serialize.is_valid():
-                submitlist_serialize.save()
-            return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
-        except:
-            return JsonResponse({"status": False, "message": "Failure Sending Email"}, status=status.HTTP_400_BAD_REQUEST)
+        # send_approval_notification(data, 'codelover93@outlook.com')
+        # send_approval_notification(data, 'zach@axe.studio')
+        send_approval_notification_mailgun(data)
+        submitlist_serialize = SubmittedSerializer(data={
+            "submit_log": json_data
+        })
+        if submitlist_serialize.is_valid():
+            submitlist_serialize.save()
+        return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
+        # except:
+        #     return JsonResponse({"status": False, "message": "Failure Sending Email"}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def get_submitted_list(request):
