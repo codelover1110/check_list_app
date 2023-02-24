@@ -796,21 +796,23 @@ def get_task_by_list(request):
         monthly_list = []
         no_option = []
         task_list = []
+        members = []
+        members_id = []
+        datas_members = Relationship_tables.objects.filter(workspace=json_data['workspace_id'])
+        for d_member in datas_members:
+            if not d_member.customer is None and not d_member.customer.id in members_id:
+                members_id.append(d_member.customer.id)
+                members.append({
+                    "id": d_member.customer.id,
+                    "email": d_member.customer.email,
+                    "first_name": d_member.customer.first_name,
+                    "last_name": d_member.customer.last_name,
+                    "role": d_member.role
+                })
+
         for data in relationship_workspace_data:
             if data.task is not None and not data.task.id in task_list:
                 task_list.append(data.task.id)
-                relationship_task_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], list=json_data['list_id'], task=data.task.id)                    
-                members = []
-                if relationship_task_data.exists():
-                    for task_data in relationship_task_data:
-                        members.append({
-                            "id": task_data.customer.id,
-                            "email": task_data.customer.email,
-                            "first_name": task_data.customer.first_name,
-                            "last_name": task_data.customer.last_name,
-                            "role": task_data.role,
-                        })
-                
                 file_attachment = []
                 att_db_data = Attachments.objects.filter(task=data.task.id)     
                 if att_db_data.exists():
@@ -830,8 +832,7 @@ def get_task_by_list(request):
                         "description": data.task.description,
                         "priority": data.priority,
                         "attachments": file_attachment
-                    },
-                    "members": members
+                    }                    
                 }
 
                 print(file_attachment)
@@ -853,7 +854,8 @@ def get_task_by_list(request):
                                                 "daily":daily_list,
                                                 "weekly":weekly_list,
                                                 "monthly":monthly_list,
-                                                "no_option": no_option
+                                                "no_option": no_option,
+                                                "members": members
                                             }}, status=status.HTTP_201_CREATED)
         # except:
         #     return JsonResponse({"status": False}, status=status.HTTP_400_BAD_REQUEST)
@@ -938,17 +940,12 @@ def uncheck_task(request):
     if request.method == 'POST':
         json_data = JSONParser().parse(request)
         try:
-            for t_member in json_data['members']:
-                try:
-                    relationship_workspace_data = Relationship_tables.objects.get(workspace=json_data['workspace_id'],
+            relationship_workspace_data = Relationship_tables.objects.get(workspace=json_data['workspace_id'],
                                                                                     list=json_data['list_id'],
-                                                                                    task=json_data['task_id'],
-                                                                                    customer=t_member
+                                                                                    task=json_data['task_id']
                                                                                     )
-                    relationship_workspace_data.check_status = False
-                    relationship_workspace_data.save()
-                except:
-                    pass
+            relationship_workspace_data.check_status = False
+            relationship_workspace_data.save()
 
             return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
 
