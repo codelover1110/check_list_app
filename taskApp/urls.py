@@ -54,6 +54,7 @@ urlpatterns = [
 
     #Submit Task
     url(r'^api/get_submitted_list$', views.get_submitted_list),
+    url(r'^api/remove_submissions$', views.remove_submissions),
 
 ]
 urlpatterns+=static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

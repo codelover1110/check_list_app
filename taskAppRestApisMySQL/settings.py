@@ -169,6 +169,7 @@ EMAIL_HOST_USER = 'zachburau@gmail.com'
 EMAIL_HOST_PASSWORD = 'lnhjeeiqrhgttpcb'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
+DEFAULT_FROM_EMAIL = "Site Support <support@site.com>"
 
 # ANYMAIL = {
 #     # (exact settings here depend on your ESP...)

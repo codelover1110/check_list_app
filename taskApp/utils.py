@@ -5,6 +5,10 @@ import requests
 import os
 from django.core.mail import EmailMessage
 
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.core.mail import EmailMultiAlternatives
+
 def send_phone(user_code, phone_number):
     account_sid = ''
     auth_token = ''
@@ -105,5 +109,21 @@ def send_approval_notification_mailgun(data):
               "to": [data['email']],
               "subject": "Welcome to Tailgate.live, thank you for subscribing!",
               "html": message})
+
+def sendHTMLEmail():
+    context ={
+        "title":"Test",
+        "content":"Testing sending HTML emails from Django"
+    }
+    html_content = render_to_string("welcome.html", context)
+    text_content = strip_tags(html_content)
+    email = EmailMultiAlternatives(
+        "Test HTML Email",
+        text_content,
+        settings.EMAIL_HOST_USER ,
+        ['dev1110upwork@gmail.com']
+    )
+    email.attach_alternative(html_content, 'text/html')
+    email.send()
 
 
