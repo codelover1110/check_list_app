@@ -918,18 +918,12 @@ def check_task(request):
     if request.method == 'POST':
         json_data = JSONParser().parse(request)
         try:
-            for t_member in json_data['members']:
-                try:
-                    relationship_workspace_data = Relationship_tables.objects.get(workspace=json_data['workspace_id'],
+            relationship_workspace_data = Relationship_tables.objects.get(workspace=json_data['workspace_id'],
                                                                                     list=json_data['list_id'],
-                                                                                    task=json_data['task_id'],
-                                                                                    customer=t_member
-                                                                                    )
-                    relationship_workspace_data.check_status = True
-                    relationship_workspace_data.save()
-                except:
-                    pass
-
+                                                                                    task=json_data['task_id']
+                                                                            )
+            relationship_workspace_data.check_status = True
+            relationship_workspace_data.save()
             return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
 
         except:
