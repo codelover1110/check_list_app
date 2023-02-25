@@ -47,7 +47,7 @@ class Relationship_tables(models.Model):
                                        null=True)
     task = models.ForeignKey(Task, related_name='task', on_delete=models.CASCADE, blank=True,
                                        null=True)
-    priority = models.CharField(max_length=350, blank=True, default='')
+    priority = models.CharField(max_length=350, blank=True, default='', null=True)
     check_status= models.BooleanField(default=0)
     
 class SubmittedList(models.Model):

@@ -542,16 +542,16 @@ def submit_list(request):
                 "list_name": json_data['list_name'],
                 "list_id": json_data['list_id'],
                 "workspace_id": json_data['workspace_id'],
-                "submit_user": json_data["submit_user"]['email']
+                "submit_user": "Submit User"
             }
 
+            # send_approval_notification(data, 'codelover93@outlook.com')
+            # send_approval_notification(data, 'zach@axe.studio')
             submitlist_serialize = SubmittedSerializer(data={
                 "submit_log": json_data
             })
             if submitlist_serialize.is_valid():
                 submitlist_serialize.save()
-                
-            send_approval_notification(data)
             return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
         except:
             return JsonResponse({"status": False, "message": "Failure Sending Email"}, status=status.HTTP_400_BAD_REQUEST)
@@ -609,6 +609,12 @@ def create_task(request):
         else:
             dute_date_data = json_data['dute_date']
 
+        
+        if not "priority" in json_data or json_data['priority'] == '':
+            priority_data = None
+        else:
+            priority_data = json_data['priority']
+
         try:
             relation_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], list=json_data['list_id'])
             if relation_data.exists():  
@@ -653,8 +659,9 @@ def create_task(request):
                             for r_d in relationship_data:
                                 r_d.customer = customer[0]
                                 r_d.task = task_data
-                                r_d.priority = json_data['priority']
+                                r_d.priority = priority_data
                                 r_d.save()
+                                break
                         
                         else:
                             relationship_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'], list=json_data['list_id'], customer=customer[0].id, task__isnull=True)   
@@ -662,8 +669,9 @@ def create_task(request):
                                 print(222222222222222222222222222222222, len(relationship_data))
                                 for r_d in relationship_data:
                                     r_d.task = task_data
-                                    r_d.priority = json_data['priority']
+                                    r_d.priority = priority_data
                                     r_d.save()
+                                    break
                             else:
                                 print(1111111111111111111111)
                                 relationship_serialize = RelationshipSerializer(data={
@@ -672,12 +680,25 @@ def create_task(request):
                                     "list": json_data['list_id'],
                                     "task": task_data.id,
                                     "role": "user",
-                                    "priority": json_data['priority']
+                                    "priority": priority_data
                                     })
                                 if relationship_serialize.is_valid():
                                     relationship_serialize.save()
                     else:
                         pass
+                
+                if len(json_data['team_members']) == 0:
+                    relationship_serialize = RelationshipSerializer(data={
+                        "customer": None,
+                        "workspace": json_data['workspace_id'],
+                        "list": json_data['list_id'],
+                        "task": task_data.id,
+                        "role": "user",
+                        "priority": priority_data
+                        })
+                    if relationship_serialize.is_valid():
+                        relationship_serialize.save()
+
                 return JsonResponse({"status": True, "data":{
                     "workspace_id": json_data['workspace_id'],
                     "workspace_name": workspace_name,
@@ -689,7 +710,7 @@ def create_task(request):
                         "frequency": frequency_data,
                         "dute_date": dute_date_data,
                         "description": description_data,
-                        "priority": json_data['priority']
+                        "priority": priority_data
                     },
                 }}, status=status.HTTP_201_CREATED)
                 
