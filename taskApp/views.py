@@ -242,7 +242,7 @@ def get_workspace_for_user(request):
                                 "last_name": d_member.customer.last_name
                             })
 
-                    for d in datas_workspace:
+                    for d in datas_members:
                         if not d.list is None and not d.list.id in total_lists:
                             total_lists.append(d.list.id)
 
@@ -585,18 +585,21 @@ def remove_submissions(request):
 def get_submitted_list(request):
     if request.method == 'POST':
         json_data = JSONParser().parse(request)
-        datas = SubmittedList.objects.all()
-        return_data = []
-        if datas.exists():
+        try:
+            datas = SubmittedList.objects.all()
             return_data = []
-            for data in datas:
-                if data.submit_log['submit_user']['email'] == json_data['email']:
-                    tmp_data = data.submit_log
-                    tmp_data['id'] = data.id
-                    return_data.append(data.submit_log)
-        else:
-            return JsonResponse({"status": True, "data": []}, status=status.HTTP_201_CREATED)
-        return JsonResponse({"status": True, "data": return_data}, status=status.HTTP_201_CREATED)
+            if datas.exists():
+                return_data = []
+                for data in datas:
+                    if data.submit_log['workspace_id'] == json_data['workspace_id'] and  data.submit_log['list_id'] == json_data['list_id']:
+                        tmp_data = data.submit_log
+                        tmp_data['id'] = data.id
+                        return_data.append(data.submit_log)
+            else:
+                return JsonResponse({"status": True, "data": []}, status=status.HTTP_201_CREATED)
+            return JsonResponse({"status": True, "data": return_data}, status=status.HTTP_201_CREATED)
+        except:
+            return JsonResponse({"status": False, "message": "Invalid data"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
