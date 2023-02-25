@@ -542,16 +542,16 @@ def submit_list(request):
                 "list_name": json_data['list_name'],
                 "list_id": json_data['list_id'],
                 "workspace_id": json_data['workspace_id'],
-                "submit_user": "Submit User"
+                "submit_user": json_data["submit_user"]['email']
             }
 
-            # send_approval_notification(data, 'codelover93@outlook.com')
-            # send_approval_notification(data, 'zach@axe.studio')
             submitlist_serialize = SubmittedSerializer(data={
                 "submit_log": json_data
             })
             if submitlist_serialize.is_valid():
                 submitlist_serialize.save()
+                
+            send_approval_notification(data)
             return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
         except:
             return JsonResponse({"status": False, "message": "Failure Sending Email"}, status=status.HTTP_400_BAD_REQUEST)
@@ -568,17 +568,19 @@ def remove_submissions(request):
             return JsonResponse({"status": False, "message": "Submissions  doesn't exist"}, status=status.HTTP_400_BAD_REQUEST)
         
 
-@api_view(['GET'])
+@api_view(['POST'])
 def get_submitted_list(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
+        json_data = JSONParser().parse(request)
         datas = SubmittedList.objects.all()
         return_data = []
         if datas.exists():
             return_data = []
             for data in datas:
-                tmp_data = data.submit_log
-                tmp_data['id'] = data.id
-                return_data.append(data.submit_log)
+                if data.submit_log['submit_user']['email'] == json_data['email']:
+                    tmp_data = data.submit_log
+                    tmp_data['id'] = data.id
+                    return_data.append(data.submit_log)
         else:
             return JsonResponse({"status": True, "data": []}, status=status.HTTP_201_CREATED)
         return JsonResponse({"status": True, "data": return_data}, status=status.HTTP_201_CREATED)

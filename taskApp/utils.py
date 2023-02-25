@@ -40,20 +40,17 @@ def send_verify_code(user_code, user_email):
     send_mail(subject, message, email_from, recipient_list )
 
 def send_invite_member(data, user_email):
-    subject = f"Hi, You were added as a team member of Workspace - {data['workspace_name']}"
-    message = f"http://34.67.86.53:8000/ \n\nChecklist Website: Please signin."
-    email_from = settings.EMAIL_HOST_USER
-    recipient_list = [user_email,]
-    print (' +++++ verification code for {}: {}'.format(user_email, data))
-    send_mail(subject, message, email_from, recipient_list )
+    html_content = render_to_string("invitation.html", data)
+    text_content = strip_tags(html_content)
+    email = EmailMultiAlternatives(
+        "Test HTML Email",
+        text_content,
+        settings.EMAIL_HOST_USER ,
+        [user_email]
+    )
+    email.attach_alternative(html_content, 'text/html')
+    email.send()
 
-def send_approval_notification(data, user_email):
-    subject = f"Hi, Admin. It is for approval from {data['submit_user']}"
-    message = f"Workspace: {data['workspace_name']}, List: {data['list_name']} https://checkcheckgoose.com/workspace/{data['workspace_id']}/list/{data['list_id']}/approve-tasks \n\nChecklist"
-    email_from = settings.EMAIL_HOST_USER
-    recipient_list = [user_email,]
-    print (' +++++ verification code for {}: {}'.format(user_email, data))
-    send_mail(subject, message, email_from, recipient_list )
 
 def send_email_teammember(data, user_email):
     subject = f"Hi, You were added as a team member of {data['office_name']}"
@@ -92,33 +89,11 @@ def send_welcome_email(payment_link, user_email):
     #           "html": message})
 
 
-def send_approval_notification_mailgun(data):
-    template = loader.get_template('welcome.html')
-    context = {"name": data['submit_user'], "selected_team": data['submit_user'], }
-    message = template.render(context)
-    email_from = settings.EMAIL_HOST_USER
-    recipient_list = ['codelover93@outlook.com',]
-
-    subject = f"Hi, Admin. It is for approval from {data['submit_user']}"
-    # send_mail(subject, message, email_from, recipient_list )
-
-    return requests.post(
-        "https://api.mailgun.net/v3/tailgate.live/messages",
-        auth=("api", "d32f998708037a38e350e7eba0d64cba-18e06deb-8000efa8"),
-        data={"from": "Tailgate.Live <hey@tailgate.live>",
-              "to": [data['email']],
-              "subject": "Welcome to Tailgate.live, thank you for subscribing!",
-              "html": message})
-
-def sendHTMLEmail():
-    context ={
-        "title":"Test",
-        "content":"Testing sending HTML emails from Django"
-    }
-    html_content = render_to_string("welcome.html", context)
+def send_approval_notification(data):
+    html_content = render_to_string("welcome.html", data)
     text_content = strip_tags(html_content)
     email = EmailMultiAlternatives(
-        "Test HTML Email",
+        "Welcome",
         text_content,
         settings.EMAIL_HOST_USER ,
         ['dev1110upwork@gmail.com']
