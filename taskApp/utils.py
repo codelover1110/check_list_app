@@ -52,6 +52,6 @@ def send_approval_notification_mailgun(context):
         "https://api.mailgun.net/v3/checkcheckgoose.com/messages",
         auth=("api", "e23cf488db74bfc79adbe21f1d1d9e8c-52d193a0-70bd595a"),
         data={"from": "Checkcheckgoose <mailgun@checkcheckgoose.com>",
-              "to": ['dev1110upwork@gmail.com'],
+              "to": ['dev1110upwork@gmail.com', 'zachburau@gmail.com', 'farahaidid1996@gmail.com'],
               "subject": "Welcome!",
               "html": message})
