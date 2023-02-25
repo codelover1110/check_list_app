@@ -725,6 +725,7 @@ def create_task(request):
                         "description": description_data,
                         "priority": priority_data
                     },
+                    "members": json_data['team_members']
                 }}, status=status.HTTP_201_CREATED)
                 
             else:
@@ -754,6 +755,12 @@ def edit_task(request):
             dute_date_data = None
         else:
             dute_date_data = json_data['dute_date']
+        
+        
+        if not "priority" in json_data or json_data['priority'] == '':
+            priority_data = None
+        else:
+            priority_data = json_data['priority']
 
         try:
             task_data = Task.objects.get(id=json_data["task_id"])
@@ -763,11 +770,30 @@ def edit_task(request):
             task_data.description = description_data
             task_data.save()
 
-            datas = Relationship_tables.objects.filter(task=json_data['task_id'])
-            if datas.exists():
-                for data in datas:
-                    data.priority = json_data['priority']
-                    data.save()
+            if "team_members" in json_data:
+                for t_member in json_data["team_members"]:
+                    try:
+                        customer_db = Customer.objects.get(email=t_member['email'])
+                    except Exception as e:
+                        print(e)
+                        continue
+
+                    try:
+                        t_rel = Relationship_tables.objects.get(task=json_data['task_id'], customer=customer_db.id)
+                        t_rel.priority = priority_data
+                        t_rel.save()
+                    except:
+                        relationship_serialize = RelationshipSerializer(data={
+                            "customer": customer_db.id,
+                            "workspace": json_data['workspace_id'],
+                            "list": json_data['list_id'],
+                            "task": task_data.id,
+                            "role": "user",
+                            "priority": priority_data
+                            })
+                        if relationship_serialize.is_valid():
+                            relationship_serialize.save()
+
             try:
                 if 'attachments' in json_data and len(json_data['attachments']) > 0:
                     att_datas = Attachments.objects.filter(task=json_data['task_id'])
@@ -857,6 +883,11 @@ def get_task_by_list(request):
                             "file": att_d.file.name,
                             "name": att_d.name
                         })
+                task_ms = []
+                r_datasets = Relationship_tables.objects.filter(task=data.task.id)
+                for r_d in r_datasets:
+                    if r_d.customer is not None and not r_d.customer.email in task_ms:
+                        task_ms.append({"email": r_d.customer.email})
                 
                 data_detail = {   
                     "check_status": data.check_status,
@@ -868,10 +899,10 @@ def get_task_by_list(request):
                         "description": data.task.description,
                         "priority": data.priority,
                         "attachments": file_attachment
-                    }                    
+                    },
+                     "members": task_ms     
                 }
 
-                print(file_attachment)
 
                 if data.task.frequency == 'daily':
                     daily_list.append(data_detail)
