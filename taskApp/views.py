@@ -17,7 +17,7 @@ import random
 import string
 from datetime import datetime
 
-from .utils import send_email, send_verify_code, send_email_teammember, send_welcome_email, send_invite_member, send_approval_notification
+from .utils import send_verify_code, send_invite_member, send_approval_notification, send_approval_notification_mailgun
 
 # Create your views here.
 class UserViewSet(viewsets.ModelViewSet):
@@ -73,7 +73,11 @@ def customer_signin(request):
                 return JsonResponse({"status": False, "message": "Invalid User. Please contact the admin user"}, status=status.HTTP_400_BAD_REQUEST)
             
             try:
-                send_verify_code(rand_number, customer_data['email'])
+                data = {
+                    "user": customer_data['email'],
+                    "otp": rand_number
+                }
+                send_verify_code(data)
             except:
                 return JsonResponse({"status": False, "message": "Failure Sending Email"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -286,7 +290,14 @@ def invite_member_workspace(request):
                 if relationship_serialize.is_valid():
                     relationship_serialize.save()
                     try:
-                        send_invite_member({"workspace_name": json_data['workspace_name']}, member['email'])
+                        now = datetime.now()
+                        dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
+                        data = {
+                            "workspace_name": json_data['workspace_name'],
+                            "user": member['email'],
+                            "date": dt_string
+                        }
+                        send_invite_member(data)
                     except:
                         pass
                         # return JsonResponse({"status": True, "message": "Failure Sending Email"}, status=status.HTTP_201_CREATED)
@@ -537,16 +548,18 @@ def submit_list(request):
     if request.method == 'POST':
         json_data = JSONParser().parse(request)
         try:
+            now = datetime.now()
+            dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
             data = {
                 "workspace_name": json_data['workspace_name'],
                 "list_name": json_data['list_name'],
                 "list_id": json_data['list_id'],
                 "workspace_id": json_data['workspace_id'],
-                "submit_user": "Submit User"
+                "submit_user": json_data["submit_user"]["email"],
+                "date": dt_string
             }
 
-            # send_approval_notification(data, 'codelover93@outlook.com')
-            # send_approval_notification(data, 'zach@axe.studio')
+            send_approval_notification_mailgun(data)
             submitlist_serialize = SubmittedSerializer(data={
                 "submit_log": json_data
             })
