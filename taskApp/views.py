@@ -165,6 +165,8 @@ def get_all_users(request):
         except:
             return JsonResponse({"status": False, "message": "User doesn't exist."}, status=status.HTTP_400_BAD_REQUEST)
         relationship_data= Relationship_tables.objects.filter(customer=customer_d.id)
+
+        workspace_ids = []
         
         for r_d in relationship_data:
             return_data = {
@@ -172,27 +174,29 @@ def get_all_users(request):
                 "workspace_name": r_d.workspace.name,
                 "members": []
             }
-            relationship_data = Relationship_tables.objects.filter(workspace=r_d.workspace.id)
-            if relationship_data.exists():
-                id_list = []
-                for r_data in relationship_data:
-                    invite_status = "Invite Sent"
-                    if not r_data.customer is None and not r_data.customer.id in id_list:
-                        id_list.append(r_data.customer.id)
-                        if r_data.customer.first_name != "":
-                            invite_status = "Invite Accepted"
-                        else:
-                            invite_status = "Invite Sent"
-                        return_data["members"].append({
-                            "member_id": r_data.customer.id,
-                            "member_email": r_data.customer.email,
-                            "member_first_name": r_data.customer.first_name,
-                            "member_last_name": r_data.customer.last_name,
-                            "invite_status": invite_status,
-                            "member_role": r_data.role,
-                        })
-            
-            data.append(return_data)
+            if  not r_d.workspace.id in workspace_ids:
+                workspace_ids.append( r_d.workspace.id)
+                relationship_data = Relationship_tables.objects.filter(workspace=r_d.workspace.id)
+                if relationship_data.exists():
+                    id_list = []
+                    for r_data in relationship_data:
+                        invite_status = "Invite Sent"
+                        if not r_data.customer is None and not r_data.customer.id in id_list:
+                            id_list.append(r_data.customer.id)
+                            if r_data.customer.first_name != "":
+                                invite_status = "Invite Accepted"
+                            else:
+                                invite_status = "Invite Sent"
+                            return_data["members"].append({
+                                "member_id": r_data.customer.id,
+                                "member_email": r_data.customer.email,
+                                "member_first_name": r_data.customer.first_name,
+                                "member_last_name": r_data.customer.last_name,
+                                "invite_status": invite_status,
+                                "member_role": r_data.role,
+                            })
+                
+                data.append(return_data)
 
         return JsonResponse({"status": True, "data": data}, status=status.HTTP_201_CREATED)
        
@@ -294,6 +298,7 @@ def invite_member_workspace(request):
                         dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
                         data = {
                             "workspace_name": json_data['workspace_name'],
+                            "workspace_id": workspace_name[0].id,
                             "user": member['email'],
                             "date": dt_string
                         }

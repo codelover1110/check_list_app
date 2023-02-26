@@ -3,45 +3,44 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link href="https://cdn.joinordo.com/emails/fonts/font.css" rel="stylesheet">
+	<style>
+		@font-face {
+			font-family: "GILROY";
+			src: url(https://admin.checkcheckgoose.com/media/media/GILROY-MEDIUM.OTF) format('truetype');
+		}
+		@font-face {
+			font-family: "GILROY-BOLD";
+			src: url(https://admin.checkcheckgoose.com/media/media/GILROY-BOLD.OTF) format('truetype');
+		}
+	</style>
 </head>
-<body style="margin: 0;background-color: #0DD5B2;">
-	<table cellspacing="0" cellpadding="0" width="600" style="width: 100%;background-size: cover;margin: 0 auto;padding-bottom: 1rem;">
-		<tbody style="display:table-row-group;vertical-align:middle;">
-			<tr style="display:table-row;vertical-align:inherit;">
-				<td style="padding: 1rem 0 1.2rem 0;text-align: center;font-size: 30px;color: #FFFFFF;font-family: GILROY; font-weight: 700;">
-					<a href="https://checkcheckgoose.com">
-						<img src="https://admin.checkcheckgoose.com/media/media/logo.png" alt="" style="width: 200px;">
-					</a>
-				</td>
-			</tr>
-		</tbody>
-	</table>
-	<table cellspacing="0" cellpadding="0" style="width: 100%; max-width: 480px;margin: 0 auto; padding-bottom: 20px;padding-top: 20px;">
+<body style="margin: 0;background-color: #0DD5B2; padding-top: 4rem;">
+	<table cellspacing="0" cellpadding="0" style="width: 100%; max-width: 480px;margin: 0 auto 0 auto; border-collapse:separate;border-color:gray;border-spacing:0;background: white;border-radius: 8px;padding-bottom: 1.5rem;padding-top: 1.5rem;padding-left: 20px;padding-right: 20px; box-shadow: 0px 4px 8px -2px rgba(16, 24, 40, 0.1), 0px 2px 4px -2px rgba(16, 24, 40, 0.06);">
 		<tr style="display:table-row;vertical-align:inherit;border-color:inherit">
-			<td style="padding-left:5px;font-size: 20px;line-height: 32px;font-family: GILROY;font-style: normal;font-weight: normal;text-align: left;">
-				<div style="background: #907AD6;height: 6px;width: 40px;left: 185px;border-radius: 0px;display: inline-block;"></div>
-				<div style="font-size: 22px; font-weight: 700; line-height: 41px;padding-left:5px;display:inline-block;vertical-align: middle;font-family: GILROY-BOLD;color: #FFFFFF;">
-					Hello {{ user }}!
-				</div>
+			<td style="padding-top: 1rem;padding-bottom: 2rem;">
+				<p style="text-align: center;"><img src="https://admin.checkcheckgoose.com/media/media/icon.png" alt="" style="width: 4rem; height: 4rem;"></p>
+				<p style="color: #101828; font-size: 24px; font-family: 'GILROY-BOLD' sans-serif; text-align: center; margin-bottom: 1rem; margin-top: 2rem;">You've been invited!</p>
+				<p  style="font-family: 'GILROY', sans-serif; font-size: 16px;color: #9A9A9A; line-height: 1.6; margin-bottom: 1rem;">
+					<span style="font-family: 'GILROY-BOLD' sans-serif;">Admin</span>
+					<span> has invited you to join the </span>
+					<span style="font-family: 'GILROY-BOLD' sans-serif;">{{ workspace_name }}</span>
+					<span> Workspace to collaborate on checklists with your team members. </span>
+				</p>
+				<p  style="font-family: 'GILROY', sans-serif; font-size: 16px;color: #9A9A9A; line-height: 1.6; margin-bottom: 1rem;">To join the workspace, please click the button below:</p>
+				<p style="text-align: center; margin-bottom: 2rem; margin-top: 2rem;">
+					<a href="https://checkcheckgoose.com/workspace/{{workspace_id}}" style="background-color: #0DD5B2; padding: 1rem 2rem; color: #FFFFFF; font-family: 'GILROY-BOLD' sans-serif; text-decoration: none; border-radius: 0.2rem; width: 90%; max-width: 250px; display: inline-block;">View Workspace</a>
+				</p>
+				<p  style="font-family: 'GILROY', sans-serif; font-size: 16px;color: #9A9A9A; line-height: 1.6; margin-bottom: 1rem;">You will need to create an account with Check Check Go if you don't already have one. Once you've joined the workspace, you can start creating checklists and inviting your team members to collaborate.</p>
+				<p  style="font-family: 'GILROY', sans-serif; font-size: 16px;color: #9A9A9A; line-height: 1.6; margin-bottom: 1rem;">Thank you for joining the Check Check Goose Checklist Workspace. We look forward to seeing how this tool will help you and your team streamline your work and achieve more together.</p>
+				<p  style="font-family: 'GILROY', sans-serif; font-size: 16px; color: #9A9A9A; line-height: 1.6; margin-bottom: 0.5rem;">Best regards,</p>
+				<p  style="font-family: 'GILROY', sans-serif; font-size: 16px; color: #9A9A9A; line-height: 1.6; margin-top: 0rem; margin-bottom: 1rem;">Check Check Goose</p>
 			</td>
 		</tr>
 	</table>
-	<table cellspacing="0" cellpadding="0" style="width: 100%; max-width: 480px;margin: 0 auto 0 auto; border-collapse:separate;border-color:gray;border-spacing:0;background: white;border-radius: 8px;padding-bottom: 20px;padding-top: 20px;padding-left: 20px;padding-right: 20px;">
+	<table cellspacing="0" cellpadding="0" style="width: 100%; max-width: 480px;margin: 0 auto 0 auto;padding-top: 2rem;padding-bottom: 2rem;">
 		<tr style="display:table-row;vertical-align:inherit;border-color:inherit">
-			<td style="padding-top: 2rem;padding-bottom: 2rem;font-family: GILROY;font-size: 16px;line-height: 28px;color: #101828;">
-				<span style="font-family: GILROY-BOLD;">Admin</span>
-				<span> has invited you for workspace </span>
-				<span style="font-family: GILROY-BOLD;">{{ workspace_name }}</span>
-				<span> on </span>
-				<span>{{ date }}</span>
-			</td>
-		</tr>
-	</table>
-	<table cellspacing="0" cellpadding="0" style="width: 100%; max-width: 480px;margin: 50px auto 0 auto;padding-top: 2rem;padding-bottom: 2rem;border-top: 1px solid gray;">
-		<tr style="display:table-row;vertical-align:inherit;border-color:inherit">
-			<td style="color: #101828;font-family: GILROY;font-weight: 500">CheckCheckGoose.com - Built by Axe</td>
-			<td style="color: #101828;font-family: GILROY;font-weight: 500;text-align: right">Unsubscribe</td>
+			<td style="color: #FFFFFF; font-family: 'GILROY', sans-serif; font-weight: 500">CheckCheckGoose.com</td>
+			<td style="color: #FFFFFF; font-family: 'GILROY', sans-serif; font-weight: 500;text-align: right">Unsubscribe</td>
 		</tr>
 	</table>
 </body>
