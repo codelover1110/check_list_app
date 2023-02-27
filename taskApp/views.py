@@ -555,21 +555,22 @@ def submit_list(request):
         try:
             now = datetime.now()
             dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
-            data = {
-                "workspace_name": json_data['workspace_name'],
-                "list_name": json_data['list_name'],
-                "list_id": json_data['list_id'],
-                "workspace_id": json_data['workspace_id'],
-                "submit_user": json_data["submit_user"]["email"],
-                "date": dt_string
-            }
-
-            send_approval_notification_mailgun(data)
             submitlist_serialize = SubmittedSerializer(data={
                 "submit_log": json_data
             })
             if submitlist_serialize.is_valid():
-                submitlist_serialize.save()
+                sub_data =  submitlist_serialize.save()
+                data = {
+                    "workspace_name": json_data['workspace_name'],
+                    "list_name": json_data['list_name'],
+                    "list_id": json_data['list_id'],
+                    "workspace_id": json_data['workspace_id'],
+                    "submit_user": json_data["submit_user"]["email"],
+                    "date": dt_string,
+                    "log_id": sub_data.id
+                }
+
+                send_approval_notification_mailgun(data)
             return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
         except:
             return JsonResponse({"status": False, "message": "Failure Sending Email"}, status=status.HTTP_400_BAD_REQUEST)
