@@ -993,12 +993,13 @@ def check_task(request):
     if request.method == 'POST':
         json_data = JSONParser().parse(request)
         try:
-            relationship_workspace_data = Relationship_tables.objects.get(workspace=json_data['workspace_id'],
+            relationship_workspace_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'],
                                                                                     list=json_data['list_id'],
                                                                                     task=json_data['task_id']
                                                                             )
-            relationship_workspace_data.check_status = True
-            relationship_workspace_data.save()
+            for r_data in relationship_workspace_data:
+                r_data.check_status = True
+                r_data.save()
             return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
 
         except:
@@ -1009,12 +1010,13 @@ def uncheck_task(request):
     if request.method == 'POST':
         json_data = JSONParser().parse(request)
         try:
-            relationship_workspace_data = Relationship_tables.objects.get(workspace=json_data['workspace_id'],
+            relationship_workspace_data = Relationship_tables.objects.filter(workspace=json_data['workspace_id'],
                                                                                     list=json_data['list_id'],
                                                                                     task=json_data['task_id']
                                                                                     )
-            relationship_workspace_data.check_status = False
-            relationship_workspace_data.save()
+            for r_data in relationship_workspace_data:
+                r_data.check_status = False
+                r_data.save()
 
             return JsonResponse({"status": True}, status=status.HTTP_201_CREATED)
 
