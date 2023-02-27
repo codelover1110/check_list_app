@@ -805,27 +805,39 @@ def edit_task(request):
             try:
                 if 'attachments' in json_data and len(json_data['attachments']) > 0:
                     att_datas = Attachments.objects.filter(task=json_data['task_id'])
+                    db_data = []
+                    attr_data = []
+                   
                     if att_datas.exists():
                         for att_d in att_datas:
-                            att_d.delete()
+                            db_data.append(att_d.name)
 
                     for att in json_data['attachments']:
-                        import base64
-                        from django.core.files.base import ContentFile
-                        format, imgstr = att['file'].split(';base64,') 
-                        ext = format.split('/')[-1] 
-                        data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)                     
-                        try:
-                            attdb_serialize = AttachmentsSerializer(data={
-                                'task': task_data.id,
-                                'file': data,
-                                'name': att['name']
-                            })
+                        attr_data.append(att['name'])
+                        if not att['name'] in db_data:
+                            import base64
+                            from django.core.files.base import ContentFile
+                            format, imgstr = att['file'].split(';base64,') 
+                            ext = format.split('/')[-1] 
+                            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)                     
+                            try:
+                                attdb_serialize = AttachmentsSerializer(data={
+                                    'task': task_data.id,
+                                    'file': data,
+                                    'name': att['name']
+                                })
 
-                            if attdb_serialize.is_valid():
-                                attdb_serialize.save()
-                        except Exception as e:
-                            print(e)
+                                if attdb_serialize.is_valid():
+                                    attdb_serialize.save()
+                                    
+                            except Exception as e:
+                                print(e)
+                    
+                    if att_datas.exists():
+                        for att_d in att_datas:
+                            if not att_d.name in attr_data:
+                                att_d.delete()
+
             except Exception as e:
                 print(e)
                 return JsonResponse({"status": False, "message": "Failing file upload"}, status=status.HTTP_400_BAD_REQUEST)
