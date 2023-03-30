@@ -779,10 +779,12 @@ def edit_task(request):
             task_data.description = description_data
             task_data.save()
 
+            mems_data = []
             if "team_members" in json_data:
                 for t_member in json_data["team_members"]:
                     try:
                         customer_db = Customer.objects.get(email=t_member['email'])
+                        mems_data.append(customer_db.id)
                     except Exception as e:
                         print(e)
                         continue
@@ -802,6 +804,14 @@ def edit_task(request):
                             })
                         if relationship_serialize.is_valid():
                             relationship_serialize.save()
+
+                
+            # remove members with edit_task
+            real_data = Relationship_tables.objects.filter(task=json_data['task_id'])
+            for r_d in real_data:
+                if not r_d.customer.id in mems_data:
+                    r_d.delete()
+
 
             try:
                 if 'attachments' in json_data and len(json_data['attachments']) > 0:
